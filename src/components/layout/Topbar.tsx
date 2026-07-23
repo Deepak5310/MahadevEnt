@@ -103,7 +103,7 @@ export function Topbar() {
               {initials}
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+            <div className="topbar-user-info" style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
               <span
                 style={{
                   fontSize:     '0.8rem',
@@ -138,7 +138,7 @@ export function Topbar() {
               title="Sign out"
             >
               <LogOut size={13} />
-              <span>Sign Out</span>
+              <span className="topbar-logout-text">Sign Out</span>
             </button>
           </div>
         </div>

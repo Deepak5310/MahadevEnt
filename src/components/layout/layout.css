@@ -360,15 +360,35 @@
   }
 
   .topbar {
-    padding: 0 var(--space-3);
-    gap: var(--space-2);
+    padding: 0 0.875rem;
+    gap: 0.5rem;
   }
 
   .topbar-search {
     display: none !important;
   }
 
+  .topbar-breadcrumb {
+    display: none !important;
+  }
+
+  .topbar-user-info {
+    display: none !important;
+  }
+
+  .topbar-logout-text {
+    display: none !important;
+  }
+
+  .topbar-user-menu {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    gap: 0.5rem !important;
+  }
+
   .layout-main {
-    padding: var(--space-3) var(--space-4);
+    padding: 0.875rem 1rem;
   }
 }

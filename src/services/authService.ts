@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../stores/useAuthStore'
 import type { User } from '../types'
-import type { Tables } from '../lib/database.types'
+import type { Tables, Database } from '../lib/database.types'
 
 /**
  * authService — All Supabase Auth operations in one place.
@@ -30,14 +30,42 @@ function profileToUser(profile: Tables<'profiles'>): User {
 }
 
 async function loadProfile(userId: string): Promise<User | null> {
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('profiles')
     .select('*')
     .eq('id', userId)
-    .single()
+    .maybeSingle()
 
-  if (error || !data) return null
-  return profileToUser(data)
+  if (data) {
+    return profileToUser(data)
+  }
+
+  // Auto-repair: If user exists in auth.users but profile row is missing in public.profiles
+  const { data: { user: authUser } } = await supabase.auth.getUser()
+  if (authUser && authUser.id === userId) {
+    const defaultName = authUser.user_metadata?.full_name ?? authUser.email?.split('@')[0] ?? 'User'
+    const newProfile: Database['public']['Tables']['profiles']['Insert'] = {
+      id:          authUser.id,
+      full_name:   defaultName,
+      email:       authUser.email ?? '',
+      role:        'admin',
+      department:  'Management',
+      designation: 'Administrator',
+      is_active:   true,
+    }
+
+    const { data: inserted, error: insertErr } = await (supabase
+      .from('profiles') as any)
+      .upsert(newProfile)
+      .select('*')
+      .single()
+
+    if (!insertErr && inserted) {
+      return profileToUser(inserted)
+    }
+  }
+
+  return null
 }
 
 /**

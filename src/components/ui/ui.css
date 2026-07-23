@@ -118,7 +118,8 @@
 .field {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--space-2);
+  width: 100%;
 }
 
 .field-label {
@@ -136,6 +137,7 @@
   position: relative;
   display: flex;
   align-items: center;
+  width: 100%;
 }
 
 .input-icon-left {
@@ -145,6 +147,8 @@
   pointer-events: none;
   display: flex;
   align-items: center;
+  justify-content: center;
+  z-index: 2;
 }
 
 .input-icon-right {
@@ -153,43 +157,63 @@
   color: var(--color-text-muted);
   display: flex;
   align-items: center;
+  justify-content: center;
+  z-index: 2;
 }
 
 .input {
   width: 100%;
-  height: 2.5rem;
-  padding: 0 var(--space-3);
+  height: 2.75rem;
+  padding: 0 var(--space-4);
   background-color: var(--color-bg-elevated);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   color: var(--color-text-primary);
   font-family: var(--font-sans);
   font-size: var(--text-sm);
+  line-height: var(--leading-normal);
   transition:
     border-color var(--transition-fast),
-    box-shadow var(--transition-fast);
+    box-shadow var(--transition-fast),
+    background-color var(--transition-fast);
   outline: none;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+/* Prevent browser autofill from ruining dark theme */
+.input:-webkit-autofill,
+.input:-webkit-autofill:hover, 
+.input:-webkit-autofill:focus, 
+.input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--color-text-primary) !important;
+  -webkit-box-shadow: 0 0 0px 1000px #273449 inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+  border-color: var(--color-primary-500) !important;
 }
 
 .input::placeholder {
   color: var(--color-text-muted);
+  opacity: 0.7;
 }
 
 .input:focus {
   border-color: var(--color-primary-500);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  background-color: var(--color-bg-surface);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
 }
 
 .input--error {
-  border-color: var(--color-error);
+  border-color: var(--color-error) !important;
 }
 
 .input--error:focus {
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25) !important;
 }
 
-.input--with-left  { padding-left: 2.5rem; }
-.input--with-right { padding-right: 2.5rem; }
+.input--with-left  { padding-left: 2.75rem !important; }
+.input--with-right { padding-right: 2.75rem !important; }
 
 .input--password-toggle {
   position: absolute;
@@ -200,12 +224,16 @@
   cursor: pointer;
   display: flex;
   align-items: center;
-  padding: 0;
-  transition: color var(--transition-fast);
+  justify-content: center;
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+  z-index: 3;
 }
 
 .input--password-toggle:hover {
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 .field-error {

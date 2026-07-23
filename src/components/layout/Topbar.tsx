@@ -45,13 +45,23 @@ export function Topbar() {
 
       {/* User identity & Sign Out */}
       {user && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
-          <div className="topbar-user">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', maxWidth: 'calc(100% - 3.5rem)' }}>
+          <div className="topbar-user" style={{ minWidth: 0, overflow: 'hidden' }}>
             <div className="topbar-avatar" aria-label={`Logged in as ${user.name}`}>
               {initials}
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--weight-semibold)', color: 'var(--color-text-primary)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
+              <span
+                style={{
+                  fontSize:     'var(--text-sm)',
+                  fontWeight:   'var(--weight-semibold)',
+                  color:        'var(--color-text-primary)',
+                  whiteSpace:   'nowrap',
+                  overflow:     'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth:     '120px',
+                }}
+              >
                 {user.name}
               </span>
               <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', textTransform: 'capitalize' }}>
@@ -66,21 +76,22 @@ export function Topbar() {
             style={{
               display:         'flex',
               alignItems:      'center',
-              gap:             'var(--space-2)',
-              padding:         '0.4rem 0.85rem',
-              background:      'rgba(239, 68, 68, 0.1)',
-              border:          '1px solid rgba(239, 68, 68, 0.25)',
+              gap:             '0.35rem',
+              padding:         '0.35rem 0.65rem',
+              background:      'rgba(239, 68, 68, 0.12)',
+              border:          '1px solid rgba(239, 68, 68, 0.3)',
               borderRadius:    'var(--radius-md)',
               color:           '#f87171',
               fontSize:        'var(--text-xs)',
-              fontWeight:      'var(--weight-medium)',
+              fontWeight:      'var(--weight-semibold)',
               cursor:          'pointer',
-              transition:      'all var(--transition-fast)',
+              whiteSpace:      'nowrap',
+              flexShrink:      0,
             }}
             title="Sign out of account"
           >
             <LogOut size={14} />
-            <span>Sign Out</span>
+            <span className="topbar-logout-label">Sign Out</span>
           </button>
         </div>
       )}

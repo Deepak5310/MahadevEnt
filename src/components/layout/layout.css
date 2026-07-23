@@ -1,6 +1,6 @@
 /* ============================================================
    layout.css — Structural styles for the app shell.
-   All values use design tokens from index.css.
+   Supports Desktop, Tablet, and Mobile viewports cleanly.
    ============================================================ */
 
 /* ── Shell Wrapper ───────────────────────────────────────── */
@@ -8,6 +8,7 @@
 .layout-shell {
   min-height: 100dvh;
   background-color: var(--color-bg-base);
+  position: relative;
 }
 
 /* ── Sidebar ──────────────────────────────────────────────── */
@@ -23,9 +24,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  transition:
-    width var(--transition-base),
-    border-color var(--transition-base);
+  transition: transform var(--transition-base), width var(--transition-base), left var(--transition-base);
   z-index: var(--z-sticky);
 }
 
@@ -83,9 +82,7 @@
   margin: 0 var(--space-2);
   white-space: nowrap;
   overflow: hidden;
-  transition:
-    background-color var(--transition-fast),
-    color var(--transition-fast);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
   flex-shrink: 0;
 }
 
@@ -146,6 +143,7 @@
   min-height: 100dvh;
   margin-left: var(--sidebar-width);
   transition: margin-left var(--transition-base);
+  width: auto;
 }
 
 .layout-shell.layout-shell--collapsed .layout-content {
@@ -172,20 +170,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border: none;
-  background: transparent;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg-elevated);
   color: var(--color-text-secondary);
   border-radius: var(--radius-md);
-  transition:
-    background-color var(--transition-fast),
-    color var(--transition-fast);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
   flex-shrink: 0;
+  cursor: pointer;
 }
 
 .topbar-toggle:hover {
-  background-color: var(--color-bg-elevated);
+  background-color: var(--color-bg-muted);
   color: var(--color-text-primary);
 }
 
@@ -202,8 +199,8 @@
 }
 
 .topbar-avatar {
-  width: 2rem;
-  height: 2rem;
+  width: 2.25rem;
+  height: 2.25rem;
   border-radius: var(--radius-full);
   background-color: var(--color-primary-600);
   display: flex;
@@ -223,55 +220,38 @@
   overflow-y: auto;
 }
 
-/* ── Page Base (used by all placeholder pages) ────────────── */
-
-.page {}
-
-.page-header {
-  margin-bottom: var(--space-6);
+.page {
+  width: 100%;
 }
 
-.page-title {
-  font-size: var(--text-2xl);
-  font-weight: var(--weight-bold);
-  color: var(--color-text-primary);
-  margin-bottom: var(--space-1);
-}
+/* ── Mobile & Tablet Responsive Adaptations ───────────────── */
 
-.page-description {
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-  line-height: var(--leading-relaxed);
-}
+@media (max-width: 768px) {
+  /* On mobile, sidebar is a slide-over drawer */
+  .sidebar {
+    width: var(--sidebar-width) !important;
+    transform: translateX(-100%);
+    z-index: var(--z-modal);
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+  }
 
-/* ── Placeholder card (for empty module pages) ────────────── */
+  /* When expanded on mobile (i.e. NOT collapsed) */
+  .layout-shell:not(.layout-shell--collapsed) .sidebar {
+    transform: translateX(0);
+  }
 
-.placeholder-card {
-  margin-top: var(--space-6);
-  padding: var(--space-10);
-  background-color: var(--color-bg-surface);
-  border: 1px dashed var(--color-border);
-  border-radius: var(--radius-xl);
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-3);
-}
+  /* On mobile, content margin is always 0 */
+  .layout-content,
+  .layout-shell.layout-shell--collapsed .layout-content {
+    margin-left: 0 !important;
+  }
 
-.placeholder-card-icon {
-  color: var(--color-text-muted);
-  opacity: 0.5;
-}
+  .topbar {
+    padding: 0 var(--space-3);
+    gap: var(--space-2);
+  }
 
-.placeholder-card-title {
-  font-size: var(--text-base);
-  font-weight: var(--weight-semibold);
-  color: var(--color-text-secondary);
-}
-
-.placeholder-card-text {
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-  max-width: 28rem;
+  .layout-main {
+    padding: var(--space-3) var(--space-4);
+  }
 }

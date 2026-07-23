@@ -6,28 +6,35 @@ import './layout.css'
 
 /**
  * MainLayout — Root layout shell for all authenticated pages.
- *
- * Structure:
- *   .layout-shell
- *     <Sidebar />         ← fixed-position left panel
- *     .layout-content
- *       <Topbar />        ← sticky top bar
- *       <main>
- *         <Outlet />      ← page content injected by React Router
- *       </main>
- *
- * The collapsed CSS modifier is applied at this level so both the sidebar
- * and the content margin transition in sync.
+ * Features desktop sticky sidebar & mobile slide-over drawer with backdrop overlay.
  */
 export function MainLayout() {
-  const isCollapsed = useUIStore((s) => s.isSidebarCollapsed)
+  const isCollapsed   = useUIStore((s) => s.isSidebarCollapsed)
+  const toggleSidebar = useUIStore((s) => s.toggleSidebar)
 
   const shellClass =
     `layout-shell${isCollapsed ? ' layout-shell--collapsed' : ''}`
 
   return (
     <div className={shellClass}>
+      {/* Mobile Drawer Backdrop Overlay */}
+      {!isCollapsed && (
+        <div
+          className="mobile-backdrop"
+          onClick={toggleSidebar}
+          aria-hidden="true"
+          style={{
+            position:        'fixed',
+            inset:           0,
+            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+            backdropFilter:  'blur(4px)',
+            zIndex:          199, // just below sidebar z-index
+          }}
+        />
+      )}
+
       <Sidebar />
+
       <div className="layout-content">
         <Topbar />
         <main className="layout-main" id="main-content" tabIndex={-1}>

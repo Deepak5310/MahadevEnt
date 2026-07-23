@@ -60,8 +60,8 @@ export function QuickActions() {
       <div
         style={{
           display:             'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          gap:                 '1rem',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+          gap:                 '0.75rem',
         }}
       >
         {actions.map((act) => {
@@ -74,11 +74,11 @@ export function QuickActions() {
               style={{
                 display:         'flex',
                 alignItems:      'center',
-                gap:             '0.875rem',
-                padding:         '1rem 1.15rem',
+                gap:             '0.65rem',
+                padding:         '0.75rem 0.85rem',
                 backgroundColor: 'rgba(30, 41, 59, 0.5)',
                 border:          `1px solid ${act.border}`,
-                borderRadius:    '0.875rem',
+                borderRadius:    '0.75rem',
                 textAlign:       'left',
                 cursor:          'pointer',
                 transition:      'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',

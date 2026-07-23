@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import {
   Building2,
   LayoutDashboard,
@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { useUIStore }  from '../../stores/useUIStore'
 import { useAuthStore } from '../../stores/useAuthStore'
+import { authService } from '../../services/authService'
 
 /**
  * Navigation item definition.
@@ -25,8 +26,13 @@ const NAV_ITEMS = [
 
 export function Sidebar() {
   const isCollapsed = useUIStore((s) => s.isSidebarCollapsed)
-  const logout      = useAuthStore((s) => s.logout)
   const user        = useAuthStore((s) => s.user)
+  const navigate    = useNavigate()
+
+  async function handleLogout() {
+    await authService.signOut()
+    void navigate('/login', { replace: true })
+  }
 
   const sidebarClass = `sidebar${isCollapsed ? ' sidebar--collapsed' : ''}`
 
@@ -80,7 +86,7 @@ export function Sidebar() {
         {!isCollapsed && (
           <button
             type="button"
-            onClick={logout}
+            onClick={() => { void handleLogout() }}
             style={{
               marginLeft: 'auto',
               display: 'flex',

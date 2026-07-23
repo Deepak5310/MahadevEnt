@@ -1,39 +1,48 @@
 import { Navigate } from 'react-router-dom'
 import { useAuthStore } from '../stores/useAuthStore'
+import { Spinner } from '../components/ui/Spinner'
 
 interface ProtectedRouteProps {
-  children: React.ReactNode
-  /**
-   * Optional: restrict to specific roles.
-   * If omitted, any authenticated user is allowed.
-   *
-   * Example: <ProtectedRoute requiredRole="admin">
-   */
+  children:      React.ReactNode
   requiredRole?: 'admin' | 'employee'
 }
 
 /**
- * ProtectedRoute — Wraps a route element and enforces authentication + RBAC.
+ * ProtectedRoute — Enforces authentication + optional RBAC.
  *
- * Behaviour:
- *  1. Not authenticated → redirects to /login (preserves no history entry)
- *  2. Authenticated but wrong role → redirects to /dashboard
- *  3. Passes → renders children
- *
- * Usage in AppRoutes.tsx:
- *   element: <ProtectedRoute><MainLayout /></ProtectedRoute>
- *   element: <ProtectedRoute requiredRole="admin"><AdminPage /></ProtectedRoute>
+ * States:
+ *  1. isInitializing = true  → show full-page spinner (Supabase session check in progress)
+ *  2. Not authenticated      → redirect to /login
+ *  3. Wrong role             → redirect to /dashboard
+ *  4. Passes                 → render children
  */
 export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
-  const user            = useAuthStore((s) => s.user)
+  const isInitializing  = useAuthStore((s) => s.isInitializing)
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const user            = useAuthStore((s) => s.user)
+
+  // Session check still running — render spinner, never redirect prematurely
+  if (isInitializing) {
+    return (
+      <div
+        style={{
+          display:        'flex',
+          alignItems:     'center',
+          justifyContent: 'center',
+          minHeight:      '100dvh',
+          background:     'var(--color-bg-base)',
+        }}
+      >
+        <Spinner size="lg" color="var(--color-primary-400)" />
+      </div>
+    )
+  }
 
   if (!isAuthenticated || !user) {
     return <Navigate to="/login" replace />
   }
 
   if (requiredRole && user.role !== requiredRole) {
-    // User is authenticated but lacks the required role
     return <Navigate to="/dashboard" replace />
   }
 

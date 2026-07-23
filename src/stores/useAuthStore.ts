@@ -1,47 +1,39 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
 import type { User } from '../types'
 
 /**
  * useAuthStore — Global authentication state.
  *
- * Persisted to localStorage under the key 'mahadev-auth' so the session
- * survives page refreshes. In a real implementation, the token validation
- * happens at app startup (Step 4).
+ * Session persistence is handled by Supabase (localStorage JWT).
+ * This store only caches the derived User object for synchronous UI reads.
  *
- * Usage:
- *   const user = useAuthStore((s) => s.user)
- *   const login = useAuthStore((s) => s.login)
+ * On app startup, authService.initAuth() hydrates this store from the
+ * existing Supabase session. `isInitializing` prevents the ProtectedRoute
+ * from flashing a redirect before the session check completes.
  */
 
 interface AuthState {
-  /** Authenticated user, or null if not logged in. */
+  /** Authenticated user profile, null when logged out. */
   user: User | null
-  /** Derived: true when user is non-null. */
+  /** True when user is non-null. */
   isAuthenticated: boolean
-  /** Set user and mark as authenticated. */
-  login: (user: User) => void
-  /** Clear session. */
-  logout: () => void
+  /**
+   * True while authService.initAuth() is running.
+   * ProtectedRoute renders a spinner instead of redirecting during this time.
+   */
+  isInitializing: boolean
+
+  setUser:         (user: User)    => void
+  clearUser:       ()              => void
+  setInitializing: (value: boolean) => void
 }
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
-      user: null,
-      isAuthenticated: false,
+export const useAuthStore = create<AuthState>()((set) => ({
+  user:           null,
+  isAuthenticated: false,
+  isInitializing:  true,   // starts true — initAuth() sets it to false
 
-      login: (user) => set({ user, isAuthenticated: true }),
-
-      logout: () => set({ user: null, isAuthenticated: false }),
-    }),
-    {
-      name: 'mahadev-auth',
-      // Only persist what's needed — avoid storing derived state
-      partialize: (state) => ({
-        user: state.user,
-        isAuthenticated: state.isAuthenticated,
-      }),
-    },
-  ),
-)
+  setUser:   (user)  => set({ user, isAuthenticated: true }),
+  clearUser: ()      => set({ user: null, isAuthenticated: false }),
+  setInitializing: (value) => set({ isInitializing: value }),
+}))

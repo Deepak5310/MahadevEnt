@@ -1,6 +1,12 @@
 // src/components/ui/index.ts
-// Barrel export for all atomic/primitive UI components.
-// Add named exports here as components are created.
-// Example: export { Button } from './Button'
-//          export { Badge } from './Badge'
-//          export { Modal } from './Modal'
+// Import ui.css once here so any consumer of this barrel gets the styles.
+import './ui.css'
+
+export { Spinner }  from './Spinner'
+export { Button }   from './Button'
+export { Input }    from './Input'
+export { Badge }    from './Badge'
+export { Avatar }   from './Avatar'
+export { Card }     from './Card'
+export { Modal }    from './Modal'
+export { StatCard } from './StatCard'

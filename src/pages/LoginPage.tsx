@@ -1,153 +1,164 @@
-import { useNavigate } from 'react-router-dom'
-import { Building2 } from 'lucide-react'
+import { useState } from 'react'
+import { Navigate, useNavigate } from 'react-router-dom'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { Building2, Mail, Lock } from 'lucide-react'
+import { authService } from '../services/authService'
 import { useAuthStore } from '../stores/useAuthStore'
-import type { User } from '../types'
+import { Button } from '../components/ui/Button'
+import { Input }  from '../components/ui/Input'
+
+// ── Zod schema ─────────────────────────────────────────────────
+const loginSchema = z.object({
+  email:    z.string().min(1, 'Email is required').email('Enter a valid email address'),
+  password: z.string().min(1, 'Password is required').min(6, 'Password must be at least 6 characters'),
+})
+
+type LoginForm = z.infer<typeof loginSchema>
 
 /**
- * Dev-only mock user for bypassing auth during development.
- * This block is tree-shaken by Vite in production builds.
- */
-const DEV_ADMIN: User = {
-  id:          'dev-admin-001',
-  name:        'Dev Admin',
-  email:       'admin@mahadev.com',
-  role:        'admin',
-  department:  'Management',
-  designation: 'Administrator',
-}
-
-const DEV_EMPLOYEE: User = {
-  id:          'dev-emp-001',
-  name:        'Dev Employee',
-  email:       'employee@mahadev.com',
-  role:        'employee',
-  department:  'Operations',
-  designation: 'Field Officer',
-}
-
-/**
- * LoginPage — Placeholder.
+ * LoginPage — Email + password login form backed by Supabase Auth.
  *
- * Full login form with validation will be implemented in Step 4.
- * During development, use the bypass buttons below to test protected routes.
+ * Admin controls all accounts — no self-registration, no forgot-password.
+ * If a session already exists (e.g., back-button after login), redirects immediately.
  */
 export default function LoginPage() {
-  const login    = useAuthStore((s) => s.login)
-  const navigate = useNavigate()
+  const navigate        = useNavigate()
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const isInitializing  = useAuthStore((s) => s.isInitializing)
+  const [serverError, setServerError] = useState<string>('')
 
-  function handleLogin(user: User) {
-    login(user)
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginForm>({ resolver: zodResolver(loginSchema) })
+
+  // Already logged in — skip the login page
+  if (!isInitializing && isAuthenticated) {
+    return <Navigate to="/dashboard" replace />
+  }
+
+  const onSubmit = async (data: LoginForm) => {
+    setServerError('')
+    const result = await authService.signIn(data.email, data.password)
+    if (result.error) {
+      setServerError(result.error)
+      return
+    }
     void navigate('/dashboard', { replace: true })
   }
 
   return (
     <div
       style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100dvh',
-        gap: 'var(--space-6)',
-        padding: 'var(--space-8)',
-        background: 'var(--color-bg-base)',
+        display:         'flex',
+        flexDirection:   'column',
+        alignItems:      'center',
+        justifyContent:  'center',
+        minHeight:       '100dvh',
+        padding:         'var(--space-6)',
+        background:      'var(--color-bg-base)',
       }}
     >
       {/* Brand */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-3)' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-4)', marginBottom: 'var(--space-8)' }}>
         <div
           style={{
-            width: '3.5rem',
-            height: '3.5rem',
+            width: '3.5rem', height: '3.5rem',
             borderRadius: 'var(--radius-xl)',
-            background: 'var(--color-primary-600)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            background: 'linear-gradient(135deg, var(--color-primary-500), var(--color-primary-700))',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 8px 32px rgba(99,102,241,0.35)',
           }}
         >
           <Building2 size={24} color="#fff" />
         </div>
-        <h1 style={{ fontSize: 'var(--text-2xl)', fontWeight: 'var(--weight-bold)', color: 'var(--color-text-primary)' }}>
-          Mahadev Enterprise
-        </h1>
-        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)' }}>
-          Office Management System
-        </p>
+        <div style={{ textAlign: 'center' }}>
+          <h1 style={{ fontSize: 'var(--text-2xl)', fontWeight: 'var(--weight-bold)', color: 'var(--color-text-primary)', marginBottom: 'var(--space-1)' }}>
+            Mahadev Enterprise
+          </h1>
+          <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)' }}>
+            Office Management System
+          </p>
+        </div>
       </div>
 
-      {/* Login form placeholder */}
+      {/* Login card */}
       <div
         style={{
-          width: '100%',
-          maxWidth: '24rem',
+          width: '100%', maxWidth: '26rem',
           background: 'var(--color-bg-surface)',
           border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius-xl)',
+          borderRadius: 'var(--radius-2xl)',
           padding: 'var(--space-8)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 'var(--space-4)',
+          boxShadow: 'var(--shadow-xl)',
         }}
       >
-        <p
-          style={{
-            fontSize: 'var(--text-sm)',
-            color: 'var(--color-text-secondary)',
-            textAlign: 'center',
-            padding: 'var(--space-4)',
-            background: 'var(--color-bg-elevated)',
-            borderRadius: 'var(--radius-md)',
-            border: '1px dashed var(--color-border)',
-          }}
-        >
-          Login form coming in Step 4.
-          <br />
-          Use the dev shortcuts below.
+        <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 'var(--weight-semibold)', color: 'var(--color-text-primary)', marginBottom: 'var(--space-2)' }}>
+          Sign in to your account
+        </h2>
+        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)', marginBottom: 'var(--space-6)' }}>
+          Enter your credentials provided by the administrator.
         </p>
 
-        {/* Dev bypass — only rendered in development mode */}
-        {import.meta.env.DEV && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-            <p style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', textAlign: 'center' }}>
-              DEV MODE — Quick Login
-            </p>
-            <button
-              type="button"
-              onClick={() => handleLogin(DEV_ADMIN)}
-              style={{
-                padding: 'var(--space-3)',
-                background: 'var(--color-primary-600)',
-                color: '#fff',
-                border: 'none',
-                borderRadius: 'var(--radius-md)',
-                fontFamily: 'inherit',
-                fontSize: 'var(--text-sm)',
-                fontWeight: 'var(--weight-medium)',
-                cursor: 'pointer',
-              }}
-            >
-              Login as Admin
-            </button>
-            <button
-              type="button"
-              onClick={() => handleLogin(DEV_EMPLOYEE)}
-              style={{
-                padding: 'var(--space-3)',
-                background: 'var(--color-bg-elevated)',
-                color: 'var(--color-text-primary)',
-                border: '1px solid var(--color-border)',
-                borderRadius: 'var(--radius-md)',
-                fontFamily: 'inherit',
-                fontSize: 'var(--text-sm)',
-                fontWeight: 'var(--weight-medium)',
-                cursor: 'pointer',
-              }}
-            >
-              Login as Employee
-            </button>
+        {/* Server-level error */}
+        {serverError && (
+          <div
+            role="alert"
+            style={{
+              marginBottom: 'var(--space-4)',
+              padding: 'var(--space-3) var(--space-4)',
+              background: 'rgba(239,68,68,0.1)',
+              border: '1px solid rgba(239,68,68,0.25)',
+              borderRadius: 'var(--radius-md)',
+              fontSize: 'var(--text-sm)',
+              color: '#f87171',
+            }}
+          >
+            {serverError}
           </div>
         )}
+
+        {/* Form */}
+        <form onSubmit={handleSubmit(onSubmit)} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+          <Input
+            label="Email address"
+            type="email"
+            placeholder="you@mahadev.com"
+            autoComplete="email"
+            leftIcon={<Mail size={16} />}
+            error={errors.email?.message}
+            required
+            {...register('email')}
+          />
+
+          <Input
+            label="Password"
+            type="password"
+            placeholder="••••••••"
+            autoComplete="current-password"
+            leftIcon={<Lock size={16} />}
+            error={errors.password?.message}
+            required
+            {...register('password')}
+          />
+
+          <Button
+            type="submit"
+            variant="primary"
+            fullWidth
+            loading={isSubmitting}
+            style={{ marginTop: 'var(--space-2)' }}
+          >
+            Sign in
+          </Button>
+        </form>
+
+        <p style={{ marginTop: 'var(--space-6)', textAlign: 'center', fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)' }}>
+          Account access is managed by your administrator.
+        </p>
       </div>
     </div>
   )

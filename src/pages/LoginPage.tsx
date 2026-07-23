@@ -6,8 +6,7 @@ import { z } from 'zod'
 import { Building2, Mail, Lock, AlertCircle, ShieldCheck } from 'lucide-react'
 import { authService } from '../services/authService'
 import { useAuthStore } from '../stores/useAuthStore'
-import { Button } from '../components/ui/Button'
-import { Input }  from '../components/ui/Input'
+import { Button, Input } from '../components/ui'
 
 // ── Zod schema ─────────────────────────────────────────────────
 const loginSchema = z.object({

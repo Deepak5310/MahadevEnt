@@ -4,8 +4,9 @@
    Components MUST use these tokens; never use raw values.
    ============================================================ */
 
-/* ── Google Fonts ─────────────────────────────────────────── */
+/* ── Google Fonts & Component Styles ────────────────────────── */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import './components/ui/ui.css';
 
 /* ── Color Tokens (Dark-mode first) ──────────────────────── */
 :root {

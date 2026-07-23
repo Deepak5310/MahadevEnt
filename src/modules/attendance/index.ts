@@ -1,5 +1,6 @@
-// src/modules/attendance/index.ts
-// Attendance module — punch in/out, leave requests, attendance table.
-// Example: export { AttendanceTable } from './AttendanceTable'
-//          export { PunchCard } from './PunchCard'
-//          export { LeaveModal } from './LeaveModal'
+export * from './types'
+export * from './services/attendanceService'
+export { PunchWidgetCard }         from './components/PunchWidgetCard'
+export { AttendanceSummaryCards }  from './components/AttendanceSummaryCards'
+export { AttendanceFiltersBar }    from './components/AttendanceFiltersBar'
+export { AttendanceLogTable }      from './components/AttendanceLogTable'

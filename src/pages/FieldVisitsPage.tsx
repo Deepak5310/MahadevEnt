@@ -23,9 +23,10 @@ export default function FieldVisitsPage() {
 
   // Filter state
   const [filters, setFilters] = useState<FieldVisitFiltersState>({
-    search:   '',
-    status:   'all',
-    priority: 'all',
+    search:     '',
+    clientBank: 'all',
+    status:     'all',
+    priority:   'all',
   })
 
   // Modal State
@@ -66,10 +67,10 @@ export default function FieldVisitsPage() {
       {/* Page Header */}
       <div>
         <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#f8fafc', margin: 0, letterSpacing: '-0.02em' }}>
-          Field Visits & Dispatch
+          Loan Recovery & Field Dispatch
         </h1>
         <p style={{ fontSize: '0.875rem', color: '#94a3b8', margin: '0.25rem 0 0 0' }}>
-          Assign client visits, track location trips, monitor priority walkthroughs, and record outcomes.
+          Manage recovery cases for Bajaj Auto, Hero Finance, Tata Capital & NBFC clients, dispatch agents, and record collection outcomes.
         </p>
       </div>
 

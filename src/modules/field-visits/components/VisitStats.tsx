@@ -1,4 +1,4 @@
-import { MapPin, Navigation, CheckCircle2, AlertTriangle } from 'lucide-react'
+import { MapPin, Navigation, IndianRupee, HandCoins } from 'lucide-react'
 import type { FieldVisit } from '../types'
 
 interface VisitStatsProps {
@@ -6,16 +6,16 @@ interface VisitStatsProps {
 }
 
 export function VisitStats({ visits }: VisitStatsProps) {
-  const total       = visits.length
-  const inProgress  = visits.filter((v) => v.status === 'in_progress').length
-  const completed   = visits.filter((v) => v.status === 'completed').length
-  const highPriority = visits.filter((v) => v.priority === 'high').length
+  const total            = visits.length
+  const inProgress       = visits.filter((v) => v.status === 'in_progress').length
+  const totalOverduePortfolio = visits.reduce((acc, v) => acc + (v.overdueAmount || 0), 0)
+  const totalCollected  = visits.reduce((acc, v) => acc + (v.collectedAmount || 0), 0)
 
   const stats = [
-    { label: 'Total Assigned',    value: total,        icon: MapPin,        color: '#818cf8', bg: 'rgba(99, 102, 241, 0.12)' },
-    { label: 'Active Trips',      value: inProgress,   icon: Navigation,    color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.12)' },
-    { label: 'Completed Visits',  value: completed,    icon: CheckCircle2,  color: '#4ade80', bg: 'rgba(34, 197, 94, 0.12)' },
-    { label: 'High Priority',     value: highPriority, icon: AlertTriangle, color: '#f87171', bg: 'rgba(239, 68, 68, 0.12)' },
+    { label: 'Assigned Cases',    value: total, icon: MapPin, color: '#818cf8', bg: 'rgba(99, 102, 241, 0.12)' },
+    { label: 'Active Field Trips', value: inProgress, icon: Navigation, color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.12)' },
+    { label: 'Total Portfolio',    value: `₹${(totalOverduePortfolio / 1000).toFixed(0)}k`, icon: IndianRupee, color: '#f87171', bg: 'rgba(239, 68, 68, 0.12)' },
+    { label: 'Collected Today',   value: `₹${totalCollected.toLocaleString('en-IN')}`, icon: HandCoins, color: '#4ade80', bg: 'rgba(34, 197, 94, 0.12)' },
   ]
 
   return (
@@ -58,7 +58,7 @@ export function VisitStats({ visits }: VisitStatsProps) {
             </div>
 
             <div>
-              <p style={{ fontSize: '1.25rem', fontWeight: 700, color: '#f8fafc', margin: 0, lineHeight: 1.1 }}>
+              <p style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f8fafc', margin: 0, lineHeight: 1.1 }}>
                 {st.value}
               </p>
               <p style={{ fontSize: '0.72rem', color: '#94a3b8', margin: '0.15rem 0 0 0', whiteSpace: 'nowrap' }}>

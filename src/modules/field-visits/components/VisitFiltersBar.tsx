@@ -1,5 +1,5 @@
-import { Search, MapPinPlus, Filter } from 'lucide-react'
-import type { FieldVisitFiltersState, VisitPriority, VisitStatus } from '../types'
+import { Search, MapPinPlus, Filter, Landmark } from 'lucide-react'
+import type { FieldVisitFiltersState, ClientBank, VisitPriority, VisitStatus } from '../types'
 import { Button } from '../../../components/ui/Button'
 
 interface VisitFiltersBarProps {
@@ -35,7 +35,7 @@ export function VisitFiltersBar({ filters, onChange, onAddClick }: VisitFiltersB
           />
           <input
             type="text"
-            placeholder="Search client, title, address..."
+            placeholder="Search LAN, customer, address..."
             value={filters.search}
             onChange={(e) => onChange({ ...filters, search: e.target.value })}
             style={{
@@ -52,6 +52,34 @@ export function VisitFiltersBar({ filters, onChange, onAddClick }: VisitFiltersB
               boxSizing:       'border-box',
             }}
           />
+        </div>
+
+        {/* Client Bank Dropdown */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+          <Landmark size={14} color="#818cf8" />
+          <select
+            value={filters.clientBank}
+            onChange={(e) => onChange({ ...filters, clientBank: e.target.value as ClientBank | 'all' })}
+            style={{
+              height:          '2.35rem',
+              padding:         '0 0.75rem',
+              backgroundColor: 'rgba(15, 23, 42, 0.6)',
+              border:          '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius:    '0.625rem',
+              color:           '#cbd5e1',
+              fontSize:        '0.85rem',
+              outline:         'none',
+              cursor:          'pointer',
+            }}
+          >
+            <option value="all">All NBFC Clients</option>
+            <option value="Bajaj Auto Finance">Bajaj Auto Finance</option>
+            <option value="Hero Finance">Hero Finance</option>
+            <option value="Tata Capital">Tata Capital</option>
+            <option value="TVS Credit">TVS Credit</option>
+            <option value="Chola Finance">Chola Finance</option>
+            <option value="HDFC Bank">HDFC Bank</option>
+          </select>
         </div>
 
         {/* Status Dropdown */}
@@ -103,7 +131,7 @@ export function VisitFiltersBar({ filters, onChange, onAddClick }: VisitFiltersB
         </select>
       </div>
 
-      {/* Right: Assign Visit Button */}
+      {/* Right: Assign Recovery Visit Button */}
       <Button
         variant="primary"
         size="md"
@@ -116,7 +144,7 @@ export function VisitFiltersBar({ filters, onChange, onAddClick }: VisitFiltersB
           whiteSpace:   'nowrap',
         }}
       >
-        Assign Field Visit
+        Assign Recovery Visit
       </Button>
     </div>
   )

@@ -2,75 +2,97 @@ import { supabase } from '../../../lib/supabase'
 import { format }   from 'date-fns'
 import type { FieldVisit, FieldVisitFiltersState, CreateVisitInput, UpdateVisitInput } from '../types'
 
-const MOCK_FIELD_VISITS: FieldVisit[] = [
+const MOCK_RECOVERY_VISITS: FieldVisit[] = [
   {
-    id:             'visit-1',
-    title:          'Site Inspection & Material Audit',
-    clientName:     'L&T Construction Site B',
-    clientPhone:    '+91 98250 11223',
-    clientAddress:  'Ring Road Sector 4, Surat, Gujarat',
-    assignedToId:   'emp-1',
-    assignedToName: 'Rahul Sharma',
-    visitDate:      format(new Date(), 'yyyy-MM-dd'),
-    visitTime:      '11:00 AM',
-    status:         'in_progress',
-    priority:       'high',
-    purpose:        'Audit raw materials delivered and verify safety compliance on site.',
-    createdAt:      new Date().toISOString(),
+    id:              'recovery-1',
+    title:           'EMI Recovery & PTP Verification',
+    clientBank:      'Bajaj Auto Finance',
+    lanNumber:       'LAN-BJ-98214',
+    customerName:    'Ramesh Patel',
+    customerPhone:   '+91 98250 11223',
+    customerAddress: 'Plot 42, GIDC Industrial Area, Sachin, Surat',
+    overdueAmount:   45500,
+    dpdDays:         '60+ DPD',
+    assetInfo:       'Bajaj Pulsar 220 (GJ-05-AB-1234)',
+    assignedToId:    'emp-1',
+    assignedToName:  'Rahul Sharma',
+    visitDate:       format(new Date(), 'yyyy-MM-dd'),
+    visitTime:       '11:00 AM',
+    status:          'in_progress',
+    priority:        'high',
+    purpose:         'Visit defaulter customer location to collect 2 overdue EMIs or record firm PTP.',
+    createdAt:       new Date().toISOString(),
   },
   {
-    id:             'visit-2',
-    title:          'Client Onboarding & Contract Signing',
-    clientName:     'Reliance Textile Hub',
-    clientPhone:    '+91 98980 44556',
-    clientAddress:  'GIDC Industrial Area, Sachin, Surat',
-    assignedToId:   'emp-3',
-    assignedToName: 'Amit Kumar',
-    visitDate:      format(new Date(), 'yyyy-MM-dd'),
-    visitTime:      '02:30 PM',
-    status:         'scheduled',
-    priority:       'medium',
-    purpose:        'Finalize corporate service agreement and hand over onboarding kit.',
-    createdAt:      new Date().toISOString(),
+    id:              'recovery-2',
+    title:           'Hard Recovery & Vehicle Inspection',
+    clientBank:      'Hero Finance',
+    lanNumber:       'LAN-HF-44510',
+    customerName:    'Vijay Solanki',
+    customerPhone:   '+91 98980 44556',
+    customerAddress: 'B-104, Royal Complex, Ring Road, Surat',
+    overdueAmount:   82000,
+    dpdDays:         '90+ DPD (NPA)',
+    assetInfo:       'Hero Splendor Pro (GJ-05-CD-5678)',
+    assignedToId:    'emp-3',
+    assignedToName:  'Amit Kumar',
+    visitDate:       format(new Date(), 'yyyy-MM-dd'),
+    visitTime:       '02:30 PM',
+    status:          'scheduled',
+    priority:        'high',
+    purpose:         '90+ DPD NPA case. Issue final repossession notice and verify vehicle availability on site.',
+    createdAt:       new Date().toISOString(),
   },
   {
-    id:             'visit-3',
-    title:          'Equipment Maintenance Check',
-    clientName:     'Adani Logistics Yard',
-    clientPhone:    '+91 97123 88990',
-    clientAddress:  'Hazira Port Complex, Surat',
-    assignedToId:   'emp-1',
-    assignedToName: 'Rahul Sharma',
-    visitDate:      format(new Date(), 'yyyy-MM-dd'),
-    visitTime:      '09:30 AM',
-    status:         'completed',
-    priority:       'low',
-    purpose:        'Quarterly machinery checkup and status reporting.',
-    outcome:        'All heavy machinery cleared with 100% operational rating.',
-    createdAt:      new Date().toISOString(),
+    id:              'recovery-3',
+    title:           'Personal Loan Recovery & Collection',
+    clientBank:      'Tata Capital',
+    lanNumber:       'LAN-TC-11892',
+    customerName:    'Suresh Mehta',
+    customerPhone:   '+91 97123 88990',
+    customerAddress: 'A-22, DREAM City, Khajod, Surat',
+    overdueAmount:   28000,
+    dpdDays:         '30+ DPD',
+    assetInfo:       'Unsecured Personal Loan',
+    assignedToId:    'emp-1',
+    assignedToName:  'Rahul Sharma',
+    visitDate:       format(new Date(), 'yyyy-MM-dd'),
+    visitTime:       '09:30 AM',
+    status:          'completed',
+    priority:        'medium',
+    purpose:         'Collect overdue EMI payment via UPI/Cheque.',
+    recoveryOutcome: 'collected',
+    collectedAmount: 14000,
+    notes:           'Collected 1 EMI ₹14,000 via UPI. Receipt #REC-88492 issued.',
+    createdAt:       new Date().toISOString(),
   },
   {
-    id:             'visit-4',
-    title:          'Safety Audit & Staff Briefing',
-    clientName:     'Surat Diamond Bourse',
-    clientPhone:    '+91 98241 77665',
-    clientAddress:  'DREAM City, Khajod, Surat',
-    assignedToId:   'user-1',
-    assignedToName: 'Mahadev Admin',
-    visitDate:      format(new Date(), 'yyyy-MM-dd'),
-    visitTime:       meTimeStr(),
-    status:         'scheduled',
-    priority:       'high',
-    purpose:        'Executive meeting with security supervisors and safety walkthrough.',
-    createdAt:      new Date().toISOString(),
+    id:              'recovery-4',
+    title:           'Commercial Loan PTP Verification',
+    clientBank:      'Chola Finance',
+    lanNumber:       'LAN-CH-77201',
+    customerName:    'Deepak Shah',
+    customerPhone:   '+91 98241 77665',
+    customerAddress: 'Shop 12, Textile Market, Ring Road, Surat',
+    overdueAmount:   125000,
+    dpdDays:         '60+ DPD',
+    assetInfo:       'Commercial Equipment Loan',
+    assignedToId:    'user-1',
+    assignedToName:  'Mahadev Admin',
+    visitDate:       format(new Date(), 'yyyy-MM-dd'),
+    visitTime:       '04:00 PM',
+    status:          'completed',
+    priority:        'high',
+    purpose:         'Negotiate loan restructuring or firm PTP date.',
+    recoveryOutcome: 'ptp',
+    ptpDate:         format(new Date(Date.now() + 86400000 * 3), 'yyyy-MM-dd'),
+    ptpAmount:       60000,
+    notes:           'Borrower committed PTP of ₹60,000 on 3 days from now.',
+    createdAt:       new Date().toISOString(),
   },
 ]
 
-function meTimeStr() {
-  return '04:00 PM'
-}
-
-let visitsCache = [...MOCK_FIELD_VISITS]
+let visitsCache = [...MOCK_RECOVERY_VISITS]
 
 export async function getFieldVisits(filters?: FieldVisitFiltersState): Promise<FieldVisit[]> {
   try {
@@ -79,22 +101,30 @@ export async function getFieldVisits(filters?: FieldVisitFiltersState): Promise<
       .order('created_at', { ascending: false })
 
     if (data && data.length > 0) {
-      // Map DB records
       visitsCache = data.map((d: any) => ({
-        id:             d.id,
-        title:          d.title,
-        clientName:     d.client_name,
-        clientPhone:    d.client_phone || undefined,
-        clientAddress:  d.client_address,
-        assignedToId:   d.assigned_to_id,
-        assignedToName: d.assigned_to_name || 'Staff',
-        visitDate:      d.visit_date,
-        visitTime:      d.visit_time || undefined,
-        status:         d.status,
-        priority:       d.priority,
-        purpose:        d.purpose,
-        outcome:        d.outcome || undefined,
-        createdAt:      d.created_at,
+        id:              d.id,
+        title:           d.title,
+        clientBank:      d.client_bank || 'Bajaj Auto Finance',
+        lanNumber:       d.lan_number || 'LAN-BJ-00000',
+        customerName:    d.client_name,
+        customerPhone:   d.client_phone || undefined,
+        customerAddress: d.client_address,
+        overdueAmount:   d.overdue_amount || 0,
+        dpdDays:         d.dpd_days || '30+ DPD',
+        assetInfo:       d.asset_info || undefined,
+        assignedToId:    d.assigned_to_id,
+        assignedToName:  d.assigned_to_name || 'Staff',
+        visitDate:       d.visit_date,
+        visitTime:       d.visit_time || undefined,
+        status:          d.status,
+        priority:        d.priority,
+        purpose:         d.purpose,
+        recoveryOutcome: d.recovery_outcome || undefined,
+        ptpDate:         d.ptp_date || undefined,
+        ptpAmount:       d.ptp_amount || undefined,
+        collectedAmount: d.collected_amount || undefined,
+        notes:           d.notes || undefined,
+        createdAt:       d.created_at,
       }))
     }
   } catch (err) {
@@ -109,10 +139,16 @@ export async function getFieldVisits(filters?: FieldVisitFiltersState): Promise<
       list = list.filter(
         (v) =>
           v.title.toLowerCase().includes(q) ||
-          v.clientName.toLowerCase().includes(q) ||
-          v.clientAddress.toLowerCase().includes(q) ||
+          v.clientBank.toLowerCase().includes(q) ||
+          v.lanNumber.toLowerCase().includes(q) ||
+          v.customerName.toLowerCase().includes(q) ||
+          v.customerAddress.toLowerCase().includes(q) ||
           v.assignedToName.toLowerCase().includes(q)
       )
+    }
+
+    if (filters.clientBank && filters.clientBank !== 'all') {
+      list = list.filter((v) => v.clientBank === filters.clientBank)
     }
 
     if (filters.status && filters.status !== 'all') {
@@ -129,19 +165,24 @@ export async function getFieldVisits(filters?: FieldVisitFiltersState): Promise<
 
 export async function createFieldVisit(input: CreateVisitInput): Promise<FieldVisit> {
   const newVisit: FieldVisit = {
-    id:             `visit-${Date.now()}`,
-    title:          input.title,
-    clientName:     input.clientName,
-    clientPhone:    input.clientPhone,
-    clientAddress:  input.clientAddress,
-    assignedToId:   'emp-1',
-    assignedToName: input.assignedToName,
-    visitDate:      input.visitDate,
-    visitTime:      input.visitTime || '10:00 AM',
-    status:         'scheduled',
-    priority:       input.priority,
-    purpose:        input.purpose,
-    createdAt:      new Date().toISOString(),
+    id:              `recovery-${Date.now()}`,
+    title:           input.title,
+    clientBank:      input.clientBank,
+    lanNumber:       input.lanNumber,
+    customerName:    input.customerName,
+    customerPhone:   input.customerPhone,
+    customerAddress: input.customerAddress,
+    overdueAmount:   input.overdueAmount,
+    dpdDays:         input.dpdDays || '30+ DPD',
+    assetInfo:       input.assetInfo,
+    assignedToId:    'emp-1',
+    assignedToName:  input.assignedToName,
+    visitDate:       input.visitDate,
+    visitTime:       input.visitTime || '10:00 AM',
+    status:          'scheduled',
+    priority:        input.priority,
+    purpose:         input.purpose,
+    createdAt:       new Date().toISOString(),
   }
 
   visitsCache.unshift(newVisit)
@@ -150,9 +191,14 @@ export async function createFieldVisit(input: CreateVisitInput): Promise<FieldVi
     await (supabase.from('field_visits') as any).insert({
       id:               newVisit.id,
       title:            newVisit.title,
-      client_name:      newVisit.clientName,
-      client_phone:     newVisit.clientPhone,
-      client_address:   newVisit.clientAddress,
+      client_bank:      newVisit.clientBank,
+      lan_number:       newVisit.lanNumber,
+      client_name:      newVisit.customerName,
+      client_phone:     newVisit.customerPhone,
+      client_address:   newVisit.customerAddress,
+      overdue_amount:   newVisit.overdueAmount,
+      dpd_days:         newVisit.dpdDays,
+      asset_info:       newVisit.assetInfo,
       assigned_to_id:   newVisit.assignedToId,
       assigned_to_name: newVisit.assignedToName,
       visit_date:      newVisit.visitDate,
@@ -180,9 +226,13 @@ export async function updateVisitStatus(id: string, update: UpdateVisitInput): P
   try {
     await (supabase.from('field_visits') as any)
       .update({
-        status:   update.status,
-        outcome:  update.outcome,
-        priority: update.priority,
+        status:           update.status,
+        recovery_outcome: update.recoveryOutcome,
+        ptp_date:         update.ptpDate,
+        ptp_amount:       update.ptpAmount,
+        collected_amount: update.collectedAmount,
+        notes:            update.notes,
+        priority:         update.priority,
       })
       .eq('id', id)
   } catch (err) {

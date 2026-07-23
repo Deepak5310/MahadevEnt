@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Modal }  from '../../../components/ui/Modal'
 import { Button } from '../../../components/ui/Button'
 import { Input }  from '../../../components/ui/Input'
-import type { CreateVisitInput, VisitPriority } from '../types'
+import type { CreateVisitInput, ClientBank, VisitPriority } from '../types'
 
 interface CreateVisitModalProps {
   isOpen: boolean
@@ -11,13 +11,18 @@ interface CreateVisitModalProps {
 }
 
 export function CreateVisitModal({ isOpen, onClose, onSubmit }: CreateVisitModalProps) {
-  const [title, setTitle]                 = useState('')
-  const [clientName, setClientName]       = useState('')
-  const [clientPhone, setClientPhone]     = useState('')
-  const [clientAddress, setClientAddress] = useState('')
+  const [title, setTitle]                 = useState('EMI Recovery & Defaulter Verification')
+  const [clientBank, setClientBank]       = useState<ClientBank>('Bajaj Auto Finance')
+  const [lanNumber, setLanNumber]         = useState('LAN-BJ-98214')
+  const [customerName, setCustomerName]   = useState('')
+  const [customerPhone, setCustomerPhone] = useState('')
+  const [customerAddress, setCustomerAddress] = useState('')
+  const [overdueAmount, setOverdueAmount] = useState<number>(45000)
+  const [dpdDays, setDpdDays]             = useState('60+ DPD')
+  const [assetInfo, setAssetInfo]         = useState('')
   const [assignedToName, setAssignedToName] = useState('Rahul Sharma')
   const [visitDate, setVisitDate]         = useState(new Date().toISOString().split('T')[0])
-  const [visitTime, setVisitTime]         = useState('10:00 AM')
+  const [visitTime, setVisitTime]         = useState('11:00 AM')
   const [priority, setPriority]           = useState<VisitPriority>('high')
   const [purpose, setPurpose]             = useState('')
   const [errorMsg, setErrorMsg]           = useState<string | null>(null)
@@ -27,8 +32,8 @@ export function CreateVisitModal({ isOpen, onClose, onSubmit }: CreateVisitModal
     e.preventDefault()
     setErrorMsg(null)
 
-    if (!title.trim() || !clientName.trim() || !clientAddress.trim() || !purpose.trim()) {
-      setErrorMsg('Please fill in all required fields.')
+    if (!title.trim() || !customerName.trim() || !customerAddress.trim() || !purpose.trim() || !lanNumber.trim()) {
+      setErrorMsg('Please fill in all required recovery fields.')
       return
     }
 
@@ -36,9 +41,14 @@ export function CreateVisitModal({ isOpen, onClose, onSubmit }: CreateVisitModal
       setIsSubmitting(true)
       await onSubmit({
         title,
-        clientName,
-        clientPhone,
-        clientAddress,
+        clientBank,
+        lanNumber,
+        customerName,
+        customerPhone,
+        customerAddress,
+        overdueAmount: Number(overdueAmount) || 0,
+        dpdDays,
+        assetInfo,
         assignedToName,
         visitDate,
         visitTime,
@@ -47,14 +57,14 @@ export function CreateVisitModal({ isOpen, onClose, onSubmit }: CreateVisitModal
       })
       onClose()
     } catch (err: any) {
-      setErrorMsg(err.message ?? 'Failed to assign visit.')
+      setErrorMsg(err.message ?? 'Failed to assign recovery visit.')
     } finally {
       setIsSubmitting(false)
     }
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Assign New Field Visit">
+    <Modal isOpen={isOpen} onClose={onClose} title="Assign New Recovery Case">
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {errorMsg && (
           <div
@@ -71,9 +81,47 @@ export function CreateVisitModal({ isOpen, onClose, onSubmit }: CreateVisitModal
           </div>
         )}
 
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.875rem' }}>
+          {/* Client NBFC */}
+          <div>
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.35rem' }}>
+              Client NBFC / Bank
+            </label>
+            <select
+              value={clientBank}
+              onChange={(e) => setClientBank(e.target.value as ClientBank)}
+              style={{
+                width:           '100%',
+                height:          '2.5rem',
+                padding:         '0 0.75rem',
+                backgroundColor: 'rgba(15, 23, 42, 0.6)',
+                border:          '1px solid rgba(255, 255, 255, 0.12)',
+                borderRadius:    '0.5rem',
+                color:           '#f8fafc',
+                fontSize:        '0.85rem',
+              }}
+            >
+              <option value="Bajaj Auto Finance">Bajaj Auto Finance</option>
+              <option value="Hero Finance">Hero Finance</option>
+              <option value="Tata Capital">Tata Capital</option>
+              <option value="TVS Credit">TVS Credit</option>
+              <option value="Chola Finance">Chola Finance</option>
+              <option value="HDFC Bank">HDFC Bank</option>
+            </select>
+          </div>
+
+          <Input
+            label="Loan Account No (LAN)"
+            placeholder="LAN-BJ-98214"
+            value={lanNumber}
+            onChange={(e) => setLanNumber(e.target.value)}
+            required
+          />
+        </div>
+
         <Input
-          label="Trip Title"
-          placeholder="e.g. Site Safety Audit & Contract Briefing"
+          label="Recovery Case Title"
+          placeholder="e.g. 60+ DPD EMI Recovery & Vehicle Inspection"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
@@ -81,26 +129,51 @@ export function CreateVisitModal({ isOpen, onClose, onSubmit }: CreateVisitModal
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.875rem' }}>
           <Input
-            label="Client Name"
-            placeholder="e.g. L&T Construction Site B"
-            value={clientName}
-            onChange={(e) => setClientName(e.target.value)}
+            label="Borrower / Customer Name"
+            placeholder="e.g. Ramesh Patel"
+            value={customerName}
+            onChange={(e) => setCustomerName(e.target.value)}
             required
           />
 
           <Input
-            label="Client Phone"
+            label="Customer Contact Phone"
             placeholder="+91 98250 11223"
-            value={clientPhone}
-            onChange={(e) => setClientPhone(e.target.value)}
+            value={customerPhone}
+            onChange={(e) => setCustomerPhone(e.target.value)}
+          />
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '0.875rem' }}>
+          <Input
+            label="Overdue Amount (₹)"
+            type="number"
+            placeholder="45500"
+            value={overdueAmount}
+            onChange={(e) => setOverdueAmount(Number(e.target.value))}
+            required
+          />
+
+          <Input
+            label="DPD Bucket"
+            placeholder="e.g. 60+ DPD / 90+ NPA"
+            value={dpdDays}
+            onChange={(e) => setDpdDays(e.target.value)}
+          />
+
+          <Input
+            label="Asset / Vehicle Details"
+            placeholder="e.g. Bajaj Pulsar (GJ-05-XX-1234)"
+            value={assetInfo}
+            onChange={(e) => setAssetInfo(e.target.value)}
           />
         </div>
 
         <Input
-          label="Location / Client Address"
-          placeholder="e.g. Ring Road Sector 4, Surat, Gujarat"
-          value={clientAddress}
-          onChange={(e) => setClientAddress(e.target.value)}
+          label="Given Customer Address / Location"
+          placeholder="e.g. Plot 42, GIDC Industrial Area, Sachin, Surat"
+          value={customerAddress}
+          onChange={(e) => setCustomerAddress(e.target.value)}
           required
         />
 
@@ -108,7 +181,7 @@ export function CreateVisitModal({ isOpen, onClose, onSubmit }: CreateVisitModal
           {/* Assigned Agent */}
           <div>
             <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.35rem' }}>
-              Assigned Field Staff
+              Assigned Field Agent
             </label>
             <select
               value={assignedToName}
@@ -124,24 +197,22 @@ export function CreateVisitModal({ isOpen, onClose, onSubmit }: CreateVisitModal
                 fontSize:        '0.85rem',
               }}
             >
-              <option value="Rahul Sharma">Rahul Sharma (Field Executive)</option>
-              <option value="Amit Kumar">Amit Kumar (Operations Manager)</option>
+              <option value="Rahul Sharma">Rahul Sharma (Field Agent)</option>
+              <option value="Amit Kumar">Amit Kumar (Operations Lead)</option>
               <option value="Mahadev Admin">Mahadev Admin (System Administrator)</option>
             </select>
           </div>
 
-          {/* Date */}
           <Input
-            label="Scheduled Date"
+            label="Visit Date"
             type="date"
             value={visitDate}
             onChange={(e) => setVisitDate(e.target.value)}
             required
           />
 
-          {/* Time */}
           <Input
-            label="Scheduled Time"
+            label="Visit Time"
             placeholder="11:00 AM"
             value={visitTime}
             onChange={(e) => setVisitTime(e.target.value)}
@@ -166,7 +237,7 @@ export function CreateVisitModal({ isOpen, onClose, onSubmit }: CreateVisitModal
               fontSize:        '0.85rem',
             }}
           >
-            <option value="high">High Priority</option>
+            <option value="high">High Priority (Urgent Recovery)</option>
             <option value="medium">Medium Priority</option>
             <option value="low">Low Priority</option>
           </select>
@@ -174,12 +245,12 @@ export function CreateVisitModal({ isOpen, onClose, onSubmit }: CreateVisitModal
 
         <div>
           <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.35rem' }}>
-            Visit Purpose & Instructions
+            Field Recovery Instructions & Remarks
           </label>
           <textarea
             value={purpose}
             onChange={(e) => setPurpose(e.target.value)}
-            placeholder="Describe trip objective and deliverables..."
+            placeholder="Describe recovery objective, target amount, or repossession instructions..."
             rows={3}
             style={{
               width:           '100%',
@@ -202,7 +273,7 @@ export function CreateVisitModal({ isOpen, onClose, onSubmit }: CreateVisitModal
             Cancel
           </Button>
           <Button variant="primary" type="submit" loading={isSubmitting}>
-            Assign Trip
+            Assign Recovery Case
           </Button>
         </div>
       </form>

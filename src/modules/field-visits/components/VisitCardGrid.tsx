@@ -1,4 +1,4 @@
-import { MapPin, Calendar, Clock, Phone, Navigation, CheckCircle2, AlertCircle } from 'lucide-react'
+import { MapPin, Calendar, Clock, Phone, Navigation, CheckCircle2, AlertCircle, IndianRupee, Landmark } from 'lucide-react'
 import type { FieldVisit, VisitStatus } from '../types'
 import { Badge }  from '../../../components/ui/Badge'
 import { Avatar } from '../../../components/ui/Avatar'
@@ -39,9 +39,9 @@ export function VisitCardGrid({ visits, onUpdateStatus }: VisitCardGridProps) {
           color:           '#94a3b8',
         }}
       >
-        <MapPin size={36} color="#64748b" style={{ marginBottom: '0.5rem' }} />
-        <p style={{ fontSize: '1rem', fontWeight: 600, color: '#f8fafc', margin: 0 }}>No field visits assigned</p>
-        <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '0.25rem 0 0 0' }}>Assign a new field trip or adjust your filters.</p>
+        <Landmark size={36} color="#64748b" style={{ marginBottom: '0.5rem' }} />
+        <p style={{ fontSize: '1rem', fontWeight: 600, color: '#f8fafc', margin: 0 }}>No recovery cases assigned</p>
+        <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '0.25rem 0 0 0' }}>Assign a new recovery visit or adjust your client filters.</p>
       </div>
     )
   }
@@ -79,33 +79,94 @@ export function VisitCardGrid({ visits, onUpdateStatus }: VisitCardGridProps) {
             e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)'
           }}
         >
-          {/* Header row: Priority badge & Status badge */}
+          {/* Top Row: Client NBFC & Status */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            {getPriorityBadge(v.priority)}
+            <span
+              style={{
+                display:         'inline-flex',
+                alignItems:      'center',
+                gap:             '0.3rem',
+                padding:         '0.2rem 0.55rem',
+                borderRadius:    '0.375rem',
+                backgroundColor: 'rgba(99, 102, 241, 0.15)',
+                border:          '1px solid rgba(99, 102, 241, 0.3)',
+                color:           '#a5b4fc',
+                fontSize:        '0.72rem',
+                fontWeight:      700,
+              }}
+            >
+              <Landmark size={12} color="#818cf8" />
+              {v.clientBank}
+            </span>
             {getStatusBadge(v.status)}
           </div>
 
-          {/* Title & Client Name */}
+          {/* Customer Name, LAN, and Overdue Amount */}
           <div>
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#f8fafc', margin: 0, lineHeight: 1.3 }}>
-              {v.title}
-            </h3>
-            <p style={{ fontSize: '0.85rem', fontWeight: 600, color: '#a5b4fc', margin: '0.25rem 0 0 0' }}>
-              📍 {v.clientName}
-            </p>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#f8fafc', margin: 0, lineHeight: 1.3 }}>
+                {v.customerName}
+              </h3>
+              {getPriorityBadge(v.priority)}
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.25rem' }}>
+              <span style={{ fontSize: '0.75rem', fontFamily: 'monospace', fontWeight: 600, color: '#818cf8', background: 'rgba(255,255,255,0.04)', padding: '0.1rem 0.4rem', borderRadius: '0.25rem' }}>
+                {v.lanNumber}
+              </span>
+              {v.dpdDays && (
+                <span style={{ fontSize: '0.7rem', fontWeight: 600, color: '#f87171' }}>
+                  ⚠️ {v.dpdDays}
+                </span>
+              )}
+            </div>
           </div>
 
-          {/* Location Address & Phone */}
+          {/* Overdue Amount & Asset Box */}
+          <div
+            style={{
+              padding:         '0.75rem',
+              backgroundColor: 'rgba(15, 23, 42, 0.65)',
+              borderRadius:    '0.625rem',
+              border:          '1px solid rgba(255, 255, 255, 0.06)',
+              display:         'flex',
+              alignItems:      'center',
+              justifyContent:  'space-between',
+            }}
+          >
+            <div>
+              <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                OVERDUE AMOUNT
+              </span>
+              <p style={{ fontSize: '1.25rem', fontWeight: 800, color: '#f87171', margin: '0.1rem 0 0 0', display: 'flex', alignItems: 'center' }}>
+                <IndianRupee size={16} />
+                {v.overdueAmount.toLocaleString('en-IN')}
+              </p>
+            </div>
+
+            {v.assetInfo && (
+              <div style={{ textAlign: 'right', maxWidth: '140px' }}>
+                <span style={{ fontSize: '0.65rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>
+                  ASSET / VEHICLE
+                </span>
+                <p style={{ fontSize: '0.75rem', fontWeight: 600, color: '#cbd5e1', margin: '0.1rem 0 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {v.assetInfo}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Customer Address & Phone */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', fontSize: '0.8rem', color: '#94a3b8' }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.4rem' }}>
               <MapPin size={14} color="#818cf8" style={{ flexShrink: 0, marginTop: '0.15rem' }} />
-              <span>{v.clientAddress}</span>
+              <span>{v.customerAddress}</span>
             </div>
 
-            {v.clientPhone && (
+            {v.customerPhone && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                 <Phone size={14} color="#38bdf8" />
-                <span>{v.clientPhone}</span>
+                <span>{v.customerPhone}</span>
               </div>
             )}
 
@@ -123,7 +184,7 @@ export function VisitCardGrid({ visits, onUpdateStatus }: VisitCardGridProps) {
             </div>
           </div>
 
-          {/* Purpose / Outcome box */}
+          {/* Purpose / Recovery Outcome box */}
           <div
             style={{
               padding:         '0.65rem 0.85rem',
@@ -134,17 +195,17 @@ export function VisitCardGrid({ visits, onUpdateStatus }: VisitCardGridProps) {
               color:           '#cbd5e1',
             }}
           >
-            <strong style={{ color: '#94a3b8', display: 'block', marginBottom: '0.15rem' }}>Purpose:</strong>
+            <strong style={{ color: '#94a3b8', display: 'block', marginBottom: '0.15rem' }}>Instructions:</strong>
             {v.purpose}
 
-            {v.outcome && (
+            {v.notes && (
               <div style={{ marginTop: '0.4rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '0.35rem', color: '#4ade80' }}>
-                <strong>Outcome:</strong> {v.outcome}
+                <strong>Outcome Log:</strong> {v.notes}
               </div>
             )}
           </div>
 
-          {/* Footer: Assigned Staff & Status Actions */}
+          {/* Footer: Assigned Staff & Recovery Actions */}
           <div
             style={{
               borderTop:      '1px solid rgba(255, 255, 255, 0.08)',
@@ -160,7 +221,7 @@ export function VisitCardGrid({ visits, onUpdateStatus }: VisitCardGridProps) {
               <Avatar name={v.assignedToName} src={v.avatarUrl} size="sm" />
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#f8fafc' }}>{v.assignedToName}</span>
-                <span style={{ fontSize: '0.65rem', color: '#64748b' }}>Assigned Agent</span>
+                <span style={{ fontSize: '0.65rem', color: '#64748b' }}>Recovery Agent</span>
               </div>
             </div>
 

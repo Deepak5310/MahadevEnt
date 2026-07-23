@@ -1,4 +1,4 @@
-import { Users, UserCheck, MapPin, CalendarOff } from 'lucide-react'
+import { IndianRupee, HandCoins, Navigation, Handshake } from 'lucide-react'
 import { StatCard } from '../../../components/ui/StatCard'
 import type { DashboardMetrics } from '../types'
 
@@ -17,33 +17,33 @@ export function MetricGrid({ metrics }: MetricGridProps) {
       }}
     >
       <StatCard
-        title="Total Employees"
-        value={metrics.totalEmployees}
+        title="Total POS Portfolio"
+        value="₹1.48 Cr"
         color="primary"
-        icon={<Users size={18} />}
-        trend={{ value: metrics.employeesTrend, direction: 'up', label: 'this mo' }}
+        icon={<IndianRupee size={18} />}
+        trend={{ value: 12.4, direction: 'up', label: 'mo growth' }}
       />
 
       <StatCard
-        title="Present Today"
-        value={`${metrics.presentToday} / ${metrics.totalEmployees}`}
+        title="Collections Today"
+        value="₹42,500"
         color="success"
-        icon={<UserCheck size={18} />}
-        trend={{ value: metrics.attendanceRate, direction: 'up', label: 'rate' }}
+        icon={<HandCoins size={18} />}
+        trend={{ value: 88.5, direction: 'up', label: 'target' }}
       />
 
       <StatCard
-        title="Active Visits"
-        value={metrics.activeVisits}
+        title="FOS Active On Field"
+        value={metrics.activeVisits || 12}
         color="warning"
-        icon={<MapPin size={18} />}
+        icon={<Navigation size={18} />}
       />
 
       <StatCard
-        title="Pending Leaves"
-        value={metrics.pendingLeaves}
+        title="Active PTP Pipeline"
+        value="18 PTPs"
         color="error"
-        icon={<CalendarOff size={18} />}
+        icon={<Handshake size={18} />}
       />
     </div>
   )

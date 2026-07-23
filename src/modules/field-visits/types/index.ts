@@ -1,6 +1,7 @@
 export type VisitStatus          = 'scheduled' | 'in_progress' | 'completed' | 'cancelled'
 export type VisitPriority        = 'high' | 'medium' | 'low'
-export type ClientBank           = 'Bajaj Auto Finance' | 'Hero Finance' | 'Tata Capital' | 'TVS Credit' | 'Chola Finance' | 'HDFC Bank'
+export type ClientBank           = 'Bajaj Auto Finance' | 'Hero Fincorp' | 'Tata Capital' | 'TVS Credit' | 'Chola Finance' | 'HDFC Bank'
+export type DpdBucket            = 'B1 (1-30 DPD)' | 'B2 (31-60 DPD)' | 'B3 (61-90 DPD)' | 'B4+ NPA (90+ DPD)'
 export type RecoveryOutcomeType  = 'ptp' | 'collected' | 'refused' | 'untraceable' | 'repossession'
 
 export interface FieldVisit {
@@ -11,9 +12,10 @@ export interface FieldVisit {
   customerName:    string
   customerPhone?:  string
   customerAddress: string
-  overdueAmount:   number // in INR ₹
-  dpdDays?:        string // e.g. "60+ DPD"
-  assetInfo?:      string // e.g. "Bajaj Pulsar 220 (GJ-05-XX-1234)"
+  posAmount:       number // Principal Outstanding (POS) in ₹
+  tosAmount:       number // Total Overdue Amount (TOS) in ₹
+  dpdBucket:       DpdBucket
+  assetInfo?:      string // e.g. "Bajaj Pulsar 220 (GJ-05-AB-1234)"
   assignedToId:    string
   assignedToName:  string
   avatarUrl?:      string
@@ -33,6 +35,7 @@ export interface FieldVisit {
 export interface FieldVisitFiltersState {
   search:     string
   clientBank: 'all' | ClientBank
+  dpdBucket:  'all' | DpdBucket
   status:     'all' | VisitStatus
   priority:   'all' | VisitPriority
 }
@@ -44,8 +47,9 @@ export interface CreateVisitInput {
   customerName:    string
   customerPhone?:  string
   customerAddress: string
-  overdueAmount:   number
-  dpdDays?:        string
+  posAmount:       number
+  tosAmount:       number
+  dpdBucket:       DpdBucket
   assetInfo?:      string
   assignedToName:  string
   visitDate:       string

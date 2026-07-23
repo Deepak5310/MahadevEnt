@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Modal }  from '../../../components/ui/Modal'
 import { Button } from '../../../components/ui/Button'
 import { Input }  from '../../../components/ui/Input'
-import type { CreateVisitInput, ClientBank, VisitPriority } from '../types'
+import type { CreateVisitInput, ClientBank, DpdBucket, VisitPriority } from '../types'
 
 interface CreateVisitModalProps {
   isOpen: boolean
@@ -11,16 +11,17 @@ interface CreateVisitModalProps {
 }
 
 export function CreateVisitModal({ isOpen, onClose, onSubmit }: CreateVisitModalProps) {
-  const [title, setTitle]                 = useState('EMI Recovery & Defaulter Verification')
+  const [title, setTitle]                 = useState('B2 EMI Recovery & Vehicle Inspection')
   const [clientBank, setClientBank]       = useState<ClientBank>('Bajaj Auto Finance')
   const [lanNumber, setLanNumber]         = useState('LAN-BJ-98214')
   const [customerName, setCustomerName]   = useState('')
   const [customerPhone, setCustomerPhone] = useState('')
   const [customerAddress, setCustomerAddress] = useState('')
-  const [overdueAmount, setOverdueAmount] = useState<number>(45000)
-  const [dpdDays, setDpdDays]             = useState('60+ DPD')
-  const [assetInfo, setAssetInfo]         = useState('')
-  const [assignedToName, setAssignedToName] = useState('Rahul Sharma')
+  const [posAmount, setPosAmount]         = useState<number>(245000)
+  const [tosAmount, setTosAmount]         = useState<number>(45500)
+  const [dpdBucket, setDpdBucket]         = useState<DpdBucket>('B2 (31-60 DPD)')
+  const [assetInfo, setAssetInfo]         = useState('Bajaj Pulsar 220 (GJ-05-XX-1234)')
+  const [assignedToName, setAssignedToName] = useState('Rahul Sharma (FOS)')
   const [visitDate, setVisitDate]         = useState(new Date().toISOString().split('T')[0])
   const [visitTime, setVisitTime]         = useState('11:00 AM')
   const [priority, setPriority]           = useState<VisitPriority>('high')
@@ -46,8 +47,9 @@ export function CreateVisitModal({ isOpen, onClose, onSubmit }: CreateVisitModal
         customerName,
         customerPhone,
         customerAddress,
-        overdueAmount: Number(overdueAmount) || 0,
-        dpdDays,
+        posAmount: Number(posAmount) || 0,
+        tosAmount: Number(tosAmount) || 0,
+        dpdBucket,
         assetInfo,
         assignedToName,
         visitDate,
@@ -102,7 +104,7 @@ export function CreateVisitModal({ isOpen, onClose, onSubmit }: CreateVisitModal
               }}
             >
               <option value="Bajaj Auto Finance">Bajaj Auto Finance</option>
-              <option value="Hero Finance">Hero Finance</option>
+              <option value="Hero Fincorp">Hero Fincorp</option>
               <option value="Tata Capital">Tata Capital</option>
               <option value="TVS Credit">TVS Credit</option>
               <option value="Chola Finance">Chola Finance</option>
@@ -121,7 +123,7 @@ export function CreateVisitModal({ isOpen, onClose, onSubmit }: CreateVisitModal
 
         <Input
           label="Recovery Case Title"
-          placeholder="e.g. 60+ DPD EMI Recovery & Vehicle Inspection"
+          placeholder="e.g. B2 EMI Recovery & Vehicle Inspection"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
@@ -129,7 +131,7 @@ export function CreateVisitModal({ isOpen, onClose, onSubmit }: CreateVisitModal
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.875rem' }}>
           <Input
-            label="Borrower / Customer Name"
+            label="Borrower / Defaulter Name"
             placeholder="e.g. Ramesh Patel"
             value={customerName}
             onChange={(e) => setCustomerName(e.target.value)}
@@ -144,30 +146,58 @@ export function CreateVisitModal({ isOpen, onClose, onSubmit }: CreateVisitModal
           />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '0.875rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.875rem' }}>
           <Input
-            label="Overdue Amount (₹)"
+            label="POS Amount (₹)"
             type="number"
-            placeholder="45500"
-            value={overdueAmount}
-            onChange={(e) => setOverdueAmount(Number(e.target.value))}
+            placeholder="245000"
+            value={posAmount}
+            onChange={(e) => setPosAmount(Number(e.target.value))}
             required
           />
 
           <Input
-            label="DPD Bucket"
-            placeholder="e.g. 60+ DPD / 90+ NPA"
-            value={dpdDays}
-            onChange={(e) => setDpdDays(e.target.value)}
+            label="TOS / Overdue EMI (₹)"
+            type="number"
+            placeholder="45500"
+            value={tosAmount}
+            onChange={(e) => setTosAmount(Number(e.target.value))}
+            required
           />
 
-          <Input
-            label="Asset / Vehicle Details"
-            placeholder="e.g. Bajaj Pulsar (GJ-05-XX-1234)"
-            value={assetInfo}
-            onChange={(e) => setAssetInfo(e.target.value)}
-          />
+          {/* DPD Bucket */}
+          <div>
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.35rem' }}>
+              DPD Bucket
+            </label>
+            <select
+              value={dpdBucket}
+              onChange={(e) => setDpdBucket(e.target.value as DpdBucket)}
+              style={{
+                width:           '100%',
+                height:          '2.5rem',
+                padding:         '0 0.75rem',
+                backgroundColor: 'rgba(15, 23, 42, 0.6)',
+                border:          '1px solid rgba(255, 255, 255, 0.12)',
+                borderRadius:    '0.5rem',
+                color:           '#f8fafc',
+                fontSize:        '0.85rem',
+              }}
+            >
+              <option value="B1 (1-30 DPD)">B1 (1-30 DPD)</option>
+              <option value="B2 (31-60 DPD)">B2 (31-60 DPD)</option>
+              <option value="B3 (61-90 DPD)">B3 (61-90 DPD)</option>
+              <option value="B4+ NPA (90+ DPD)">B4+ NPA (90+ DPD)</option>
+            </select>
+          </div>
         </div>
+
+        <Input
+          label="Asset / Vehicle Details"
+          placeholder="e.g. Bajaj Pulsar 220 (GJ-05-XX-1234)"
+          value={assetInfo}
+          onChange={(e) => setAssetInfo(e.target.value)}
+        />
 
         <Input
           label="Given Customer Address / Location"
@@ -181,7 +211,7 @@ export function CreateVisitModal({ isOpen, onClose, onSubmit }: CreateVisitModal
           {/* Assigned Agent */}
           <div>
             <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.35rem' }}>
-              Assigned Field Agent
+              Assigned Field Agent (FOS)
             </label>
             <select
               value={assignedToName}
@@ -197,8 +227,8 @@ export function CreateVisitModal({ isOpen, onClose, onSubmit }: CreateVisitModal
                 fontSize:        '0.85rem',
               }}
             >
-              <option value="Rahul Sharma">Rahul Sharma (Field Agent)</option>
-              <option value="Amit Kumar">Amit Kumar (Operations Lead)</option>
+              <option value="Rahul Sharma (FOS)">Rahul Sharma (FOS)</option>
+              <option value="Amit Kumar (FOS Lead)">Amit Kumar (FOS Lead)</option>
               <option value="Mahadev Admin">Mahadev Admin (System Administrator)</option>
             </select>
           </div>

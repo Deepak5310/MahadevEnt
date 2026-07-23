@@ -1,5 +1,5 @@
-import { Search, MapPinPlus, Filter, Landmark } from 'lucide-react'
-import type { FieldVisitFiltersState, ClientBank, VisitPriority, VisitStatus } from '../types'
+import { Search, MapPinPlus, Filter, Landmark, Layers } from 'lucide-react'
+import type { FieldVisitFiltersState, ClientBank, DpdBucket, VisitPriority, VisitStatus } from '../types'
 import { Button } from '../../../components/ui/Button'
 
 interface VisitFiltersBarProps {
@@ -35,7 +35,7 @@ export function VisitFiltersBar({ filters, onChange, onAddClick }: VisitFiltersB
           />
           <input
             type="text"
-            placeholder="Search LAN, customer, address..."
+            placeholder="Search LAN, borrower, address, FOS..."
             value={filters.search}
             onChange={(e) => onChange({ ...filters, search: e.target.value })}
             style={{
@@ -74,11 +74,37 @@ export function VisitFiltersBar({ filters, onChange, onAddClick }: VisitFiltersB
           >
             <option value="all">All NBFC Clients</option>
             <option value="Bajaj Auto Finance">Bajaj Auto Finance</option>
-            <option value="Hero Finance">Hero Finance</option>
+            <option value="Hero Fincorp">Hero Fincorp</option>
             <option value="Tata Capital">Tata Capital</option>
             <option value="TVS Credit">TVS Credit</option>
             <option value="Chola Finance">Chola Finance</option>
             <option value="HDFC Bank">HDFC Bank</option>
+          </select>
+        </div>
+
+        {/* DPD Bucket Dropdown */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+          <Layers size={14} color="#f59e0b" />
+          <select
+            value={filters.dpdBucket}
+            onChange={(e) => onChange({ ...filters, dpdBucket: e.target.value as DpdBucket | 'all' })}
+            style={{
+              height:          '2.35rem',
+              padding:         '0 0.75rem',
+              backgroundColor: 'rgba(15, 23, 42, 0.6)',
+              border:          '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius:    '0.625rem',
+              color:           '#cbd5e1',
+              fontSize:        '0.85rem',
+              outline:         'none',
+              cursor:          'pointer',
+            }}
+          >
+            <option value="all">All DPD Buckets</option>
+            <option value="B1 (1-30 DPD)">B1 (1-30 DPD)</option>
+            <option value="B2 (31-60 DPD)">B2 (31-60 DPD)</option>
+            <option value="B3 (61-90 DPD)">B3 (61-90 DPD)</option>
+            <option value="B4+ NPA (90+ DPD)">B4+ NPA (90+ DPD)</option>
           </select>
         </div>
 
@@ -144,7 +170,7 @@ export function VisitFiltersBar({ filters, onChange, onAddClick }: VisitFiltersB
           whiteSpace:   'nowrap',
         }}
       >
-        Assign Recovery Visit
+        Assign Recovery Case
       </Button>
     </div>
   )

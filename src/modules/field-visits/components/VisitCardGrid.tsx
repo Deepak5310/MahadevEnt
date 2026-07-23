@@ -1,4 +1,4 @@
-import { MapPin, Calendar, Clock, Phone, Navigation, CheckCircle2, AlertCircle, IndianRupee, Landmark } from 'lucide-react'
+import { MapPin, Calendar, Clock, Phone, Navigation, CheckCircle2, AlertCircle, IndianRupee, Landmark, ShieldAlert } from 'lucide-react'
 import type { FieldVisit, VisitStatus } from '../types'
 import { Badge }  from '../../../components/ui/Badge'
 import { Avatar } from '../../../components/ui/Avatar'
@@ -26,6 +26,25 @@ function getPriorityBadge(priority: 'high' | 'medium' | 'low') {
   }
 }
 
+function getDpdBadge(dpd: string) {
+  const isNpa = dpd.includes('NPA') || dpd.includes('B4') || dpd.includes('90+')
+  return (
+    <span
+      style={{
+        fontSize:     '0.68rem',
+        fontWeight:   700,
+        color:        isNpa ? '#f87171' : '#fbbf24',
+        padding:      '0.15rem 0.45rem',
+        borderRadius: '0.25rem',
+        background:   isNpa ? 'rgba(239, 68, 68, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+        border:       `1px solid ${isNpa ? 'rgba(239, 68, 68, 0.3)' : 'rgba(245, 158, 11, 0.3)'}`,
+      }}
+    >
+      {dpd}
+    </span>
+  )
+}
+
 export function VisitCardGrid({ visits, onUpdateStatus }: VisitCardGridProps) {
   if (visits.length === 0) {
     return (
@@ -39,9 +58,9 @@ export function VisitCardGrid({ visits, onUpdateStatus }: VisitCardGridProps) {
           color:           '#94a3b8',
         }}
       >
-        <Landmark size={36} color="#64748b" style={{ marginBottom: '0.5rem' }} />
+        <ShieldAlert size={36} color="#64748b" style={{ marginBottom: '0.5rem' }} />
         <p style={{ fontSize: '1rem', fontWeight: 600, color: '#f8fafc', margin: 0 }}>No recovery cases assigned</p>
-        <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '0.25rem 0 0 0' }}>Assign a new recovery visit or adjust your client filters.</p>
+        <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '0.25rem 0 0 0' }}>Assign a new recovery case or adjust your client bank filters.</p>
       </div>
     )
   }
@@ -50,7 +69,7 @@ export function VisitCardGrid({ visits, onUpdateStatus }: VisitCardGridProps) {
     <div
       style={{
         display:             'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(330px, 1fr))',
         gap:                 '1.25rem',
         width:               '100%',
       }}
@@ -96,65 +115,82 @@ export function VisitCardGrid({ visits, onUpdateStatus }: VisitCardGridProps) {
               }}
             >
               <Landmark size={12} color="#818cf8" />
-              {v.clientBank}
+              {v.clientBank || 'Bajaj Auto Finance'}
             </span>
             {getStatusBadge(v.status)}
           </div>
 
-          {/* Customer Name, LAN, and Overdue Amount */}
+          {/* Customer Name, LAN, and DPD Pill */}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
               <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#f8fafc', margin: 0, lineHeight: 1.3 }}>
-                {v.customerName}
+                {v.customerName || 'Customer'}
               </h3>
               {getPriorityBadge(v.priority)}
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.25rem' }}>
-              <span style={{ fontSize: '0.75rem', fontFamily: 'monospace', fontWeight: 600, color: '#818cf8', background: 'rgba(255,255,255,0.04)', padding: '0.1rem 0.4rem', borderRadius: '0.25rem' }}>
-                {v.lanNumber}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
+              <span style={{ fontSize: '0.75rem', fontFamily: 'monospace', fontWeight: 700, color: '#818cf8', background: 'rgba(99, 102, 241, 0.1)', padding: '0.15rem 0.45rem', borderRadius: '0.25rem', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
+                {v.lanNumber || 'LAN-BJ-00000'}
               </span>
-              {v.dpdDays && (
-                <span style={{ fontSize: '0.7rem', fontWeight: 600, color: '#f87171' }}>
-                  ⚠️ {v.dpdDays}
-                </span>
-              )}
+              {getDpdBadge(v.dpdBucket || 'B2 (31-60 DPD)')}
             </div>
           </div>
 
-          {/* Overdue Amount & Asset Box */}
+          {/* Financials Box: POS (Principal) vs TOS (Overdue EMI) */}
           <div
             style={{
-              padding:         '0.75rem',
+              padding:         '0.75rem 0.875rem',
               backgroundColor: 'rgba(15, 23, 42, 0.65)',
               borderRadius:    '0.625rem',
               border:          '1px solid rgba(255, 255, 255, 0.06)',
-              display:         'flex',
-              alignItems:      'center',
-              justifyContent:  'space-between',
+              display:         'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap:             '0.75rem',
             }}
           >
+            {/* POS */}
             <div>
-              <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                OVERDUE AMOUNT
+              <span style={{ fontSize: '0.65rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                POS (PRINCIPAL)
               </span>
-              <p style={{ fontSize: '1.25rem', fontWeight: 800, color: '#f87171', margin: '0.1rem 0 0 0', display: 'flex', alignItems: 'center' }}>
-                <IndianRupee size={16} />
-                {(v.overdueAmount ?? 0).toLocaleString('en-IN')}
+              <p style={{ fontSize: '1.15rem', fontWeight: 800, color: '#f8fafc', margin: '0.1rem 0 0 0', display: 'flex', alignItems: 'center' }}>
+                <IndianRupee size={15} color="#cbd5e1" />
+                {(v.posAmount ?? 0).toLocaleString('en-IN')}
               </p>
             </div>
 
-            {v.assetInfo && (
-              <div style={{ textAlign: 'right', maxWidth: '140px' }}>
-                <span style={{ fontSize: '0.65rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>
-                  ASSET / VEHICLE
-                </span>
-                <p style={{ fontSize: '0.75rem', fontWeight: 600, color: '#cbd5e1', margin: '0.1rem 0 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {v.assetInfo}
-                </p>
-              </div>
-            )}
+            {/* TOS */}
+            <div style={{ borderLeft: '1px solid rgba(255, 255, 255, 0.08)', paddingLeft: '0.75rem' }}>
+              <span style={{ fontSize: '0.65rem', fontWeight: 600, color: '#f87171', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                TOS (OVERDUE EMI)
+              </span>
+              <p style={{ fontSize: '1.15rem', fontWeight: 800, color: '#f87171', margin: '0.1rem 0 0 0', display: 'flex', alignItems: 'center' }}>
+                <IndianRupee size={15} color="#f87171" />
+                {(v.tosAmount ?? 0).toLocaleString('en-IN')}
+              </p>
+            </div>
           </div>
+
+          {/* Asset Details (if any) */}
+          {v.assetInfo && (
+            <div
+              style={{
+                fontSize:        '0.75rem',
+                color:           '#cbd5e1',
+                backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                padding:         '0.4rem 0.65rem',
+                borderRadius:    '0.375rem',
+                border:          '1px solid rgba(255, 255, 255, 0.05)',
+                display:         'flex',
+                alignItems:      'center',
+                gap:             '0.4rem',
+              }}
+            >
+              <span style={{ color: '#94a3b8', fontWeight: 600 }}>Asset/Vehicle:</span>
+              <span style={{ fontWeight: 600, color: '#a5b4fc' }}>{v.assetInfo}</span>
+            </div>
+          )}
 
           {/* Customer Address & Phone */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', fontSize: '0.8rem', color: '#94a3b8' }}>
@@ -184,7 +220,7 @@ export function VisitCardGrid({ visits, onUpdateStatus }: VisitCardGridProps) {
             </div>
           </div>
 
-          {/* Purpose / Recovery Outcome box */}
+          {/* Instructions & Recovery Outcome */}
           <div
             style={{
               padding:         '0.65rem 0.85rem',
@@ -195,17 +231,17 @@ export function VisitCardGrid({ visits, onUpdateStatus }: VisitCardGridProps) {
               color:           '#cbd5e1',
             }}
           >
-            <strong style={{ color: '#94a3b8', display: 'block', marginBottom: '0.15rem' }}>Instructions:</strong>
+            <strong style={{ color: '#94a3b8', display: 'block', marginBottom: '0.15rem' }}>FOS Instructions:</strong>
             {v.purpose}
 
             {v.notes && (
               <div style={{ marginTop: '0.4rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '0.35rem', color: '#4ade80' }}>
-                <strong>Outcome Log:</strong> {v.notes}
+                <strong>Collection Outcome:</strong> {v.notes}
               </div>
             )}
           </div>
 
-          {/* Footer: Assigned Staff & Recovery Actions */}
+          {/* Footer: FOS Agent & Actions */}
           <div
             style={{
               borderTop:      '1px solid rgba(255, 255, 255, 0.08)',
@@ -216,16 +252,16 @@ export function VisitCardGrid({ visits, onUpdateStatus }: VisitCardGridProps) {
               gap:            '0.5rem',
             }}
           >
-            {/* Assigned Staff */}
+            {/* FOS Agent */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Avatar name={v.assignedToName} src={v.avatarUrl} size="sm" />
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#f8fafc' }}>{v.assignedToName}</span>
-                <span style={{ fontSize: '0.65rem', color: '#64748b' }}>Recovery Agent</span>
+                <span style={{ fontSize: '0.65rem', color: '#818cf8', fontWeight: 600 }}>Field Agent (FOS)</span>
               </div>
             </div>
 
-            {/* Status Actions */}
+            {/* Actions */}
             <div style={{ display: 'flex', gap: '0.35rem' }}>
               {v.status === 'scheduled' && (
                 <Button

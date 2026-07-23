@@ -25,6 +25,7 @@ export default function FieldVisitsPage() {
   const [filters, setFilters] = useState<FieldVisitFiltersState>({
     search:     '',
     clientBank: 'all',
+    dpdBucket:  'all',
     status:     'all',
     priority:   'all',
   })

@@ -1,4 +1,7 @@
-// src/modules/dashboard/index.ts
-// Dashboard module — overview stats, quick actions, activity feed.
-// Example: export { DashboardView } from './DashboardView'
-//          export { StatCard } from './StatCard'
+export * from './types'
+export * from './services/dashboardService'
+export { WelcomeBanner }    from './components/WelcomeBanner'
+export { MetricGrid }       from './components/MetricGrid'
+export { QuickActions }     from './components/QuickActions'
+export { AttendanceWidget } from './components/AttendanceWidget'
+export { ActivityFeed }     from './components/ActivityFeed'

@@ -1,23 +1,66 @@
-import { LayoutDashboard } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import {
+  getDashboardMetrics,
+  getRecentActivities,
+  WelcomeBanner,
+  MetricGrid,
+  QuickActions,
+  AttendanceWidget,
+  ActivityFeed,
+} from '../modules/dashboard'
+import { Spinner } from '../components/ui/Spinner'
 
 /**
- * DashboardPage — Placeholder.
- * Will contain: summary stats, activity feed, quick actions.
+ * DashboardPage — Central command center.
+ * Assembles WelcomeBanner, StatCards, QuickActions, Attendance Breakdown, and Recent Activity Feed.
+ * Uses TanStack Query for data fetching & cache management.
  */
 export default function DashboardPage() {
+  const { data: metrics, isLoading: isMetricsLoading } = useQuery({
+    queryKey: ['dashboard-metrics'],
+    queryFn: getDashboardMetrics,
+  })
+
+  const { data: activities, isLoading: isActivitiesLoading } = useQuery({
+    queryKey: ['dashboard-activities'],
+    queryFn: getRecentActivities,
+  })
+
+  const isLoading = isMetricsLoading || isActivitiesLoading
+
   return (
-    <div className="page">
-      <div className="page-header">
-        <h1 className="page-title">Dashboard</h1>
-        <p className="page-description">Overview of attendance, visits, and team activity.</p>
-      </div>
-      <div className="placeholder-card">
-        <LayoutDashboard size={40} className="placeholder-card-icon" />
-        <p className="placeholder-card-title">Dashboard Module</p>
-        <p className="placeholder-card-text">
-          Stats cards, recent activity, and quick-action shortcuts will be built here in Step 4.
-        </p>
-      </div>
+    <div className="page" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
+      {/* Welcome Banner & Quick Punch Widget */}
+      <WelcomeBanner />
+
+      {isLoading && (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: 'var(--space-12)' }}>
+          <Spinner size="lg" color="var(--color-primary-400)" />
+        </div>
+      )}
+
+      {!isLoading && metrics && (
+        <>
+          {/* Key Metric Stat Cards */}
+          <MetricGrid metrics={metrics} />
+
+          {/* Quick Shortcuts */}
+          <QuickActions />
+
+          {/* 2-Column Grid: Attendance Breakdown & Recent Activity */}
+          <div
+            style={{
+              display:               'grid',
+              gridTemplateColumns:   'repeat(auto-fit, minmax(340px, 1fr))',
+              gap:                   'var(--space-6)',
+              alignItems:            'start',
+            }}
+          >
+            <AttendanceWidget metrics={metrics} />
+            <ActivityFeed activities={activities ?? []} />
+          </div>
+        </>
+      )}
     </div>
   )
 }

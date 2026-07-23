@@ -1,5 +1,6 @@
-// src/modules/employees/index.ts
-// Employees module — employee list, profiles, add/edit/deactivate.
-// Example: export { EmployeeList } from './EmployeeList'
-//          export { EmployeeCard } from './EmployeeCard'
-//          export { EmployeeForm } from './EmployeeForm'
+export * from './types'
+export * from './services/employeeService'
+export { EmployeeStats }        from './components/EmployeeStats'
+export { EmployeeFiltersBar }   from './components/EmployeeFiltersBar'
+export { EmployeeTable }        from './components/EmployeeTable'
+export { EmployeeModal }        from './components/EmployeeModal'

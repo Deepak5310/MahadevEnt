@@ -83,28 +83,28 @@ export function Sidebar() {
           {user?.name?.charAt(0)?.toUpperCase() ?? '?'}
         </div>
         <span className="sidebar-footer-label">{user?.name ?? 'Guest'}</span>
-        {!isCollapsed && (
-          <button
-            type="button"
-            onClick={() => { void handleLogout() }}
-            style={{
-              marginLeft: 'auto',
-              display: 'flex',
-              alignItems: 'center',
-              background: 'transparent',
-              border: 'none',
-              color: 'var(--color-text-muted)',
-              cursor: 'pointer',
-              padding: '0.25rem',
-              borderRadius: 'var(--radius-sm)',
-              transition: 'color var(--transition-fast)',
-            }}
-            title="Sign out"
-            aria-label="Sign out"
-          >
-            <LogOut size={15} />
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={() => { void handleLogout() }}
+          style={{
+            marginLeft:     'auto',
+            display:        'flex',
+            alignItems:     'center',
+            justifyContent: 'center',
+            background:     'transparent',
+            border:         'none',
+            color:          'var(--color-text-muted)',
+            cursor:         'pointer',
+            padding:        '0.35rem',
+            borderRadius:   'var(--radius-md)',
+            transition:     'all var(--transition-fast)',
+            flexShrink:     0,
+          }}
+          title="Sign out"
+          aria-label="Sign out"
+        >
+          <LogOut size={16} />
+        </button>
       </div>
     </aside>
   )

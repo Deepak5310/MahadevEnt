@@ -1,17 +1,17 @@
-import { PanelLeftClose, PanelLeftOpen } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { PanelLeftClose, PanelLeftOpen, LogOut } from 'lucide-react'
 import { useUIStore }  from '../../stores/useUIStore'
 import { useAuthStore } from '../../stores/useAuthStore'
+import { authService } from '../../services/authService'
 
 /**
- * Topbar — Sticky page header with sidebar toggle and user info.
- *
- * Intentionally minimal at this stage. Will be extended in later steps
- * with: page title breadcrumb, notifications bell, global search.
+ * Topbar — Sticky page header with sidebar toggle, user identity, role badge, and Sign Out button.
  */
 export function Topbar() {
   const isSidebarCollapsed = useUIStore((s) => s.isSidebarCollapsed)
   const toggleSidebar      = useUIStore((s) => s.toggleSidebar)
   const user               = useAuthStore((s) => s.user)
+  const navigate           = useNavigate()
 
   const initials = user?.name
     ?.split(' ')
@@ -19,6 +19,11 @@ export function Topbar() {
     .slice(0, 2)
     .join('')
     .toUpperCase() ?? '?'
+
+  async function handleLogout() {
+    await authService.signOut()
+    void navigate('/login', { replace: true })
+  }
 
   return (
     <header className="topbar" role="banner">
@@ -38,13 +43,45 @@ export function Topbar() {
 
       <div className="topbar-spacer" />
 
-      {/* User identity */}
+      {/* User identity & Sign Out */}
       {user && (
-        <div className="topbar-user">
-          <span>{user.name}</span>
-          <div className="topbar-avatar" aria-label={`Logged in as ${user.name}`}>
-            {initials}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
+          <div className="topbar-user">
+            <div className="topbar-avatar" aria-label={`Logged in as ${user.name}`}>
+              {initials}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--weight-semibold)', color: 'var(--color-text-primary)' }}>
+                {user.name}
+              </span>
+              <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', textTransform: 'capitalize' }}>
+                {user.role}
+              </span>
+            </div>
           </div>
+
+          <button
+            type="button"
+            onClick={() => { void handleLogout() }}
+            style={{
+              display:         'flex',
+              alignItems:      'center',
+              gap:             'var(--space-2)',
+              padding:         '0.4rem 0.85rem',
+              background:      'rgba(239, 68, 68, 0.1)',
+              border:          '1px solid rgba(239, 68, 68, 0.25)',
+              borderRadius:    'var(--radius-md)',
+              color:           '#f87171',
+              fontSize:        'var(--text-xs)',
+              fontWeight:      'var(--weight-medium)',
+              cursor:          'pointer',
+              transition:      'all var(--transition-fast)',
+            }}
+            title="Sign out of account"
+          >
+            <LogOut size={14} />
+            <span>Sign Out</span>
+          </button>
         </div>
       )}
     </header>

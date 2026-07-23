@@ -140,7 +140,7 @@ export function VisitCardGrid({ visits, onUpdateStatus }: VisitCardGridProps) {
               </span>
               <p style={{ fontSize: '1.25rem', fontWeight: 800, color: '#f87171', margin: '0.1rem 0 0 0', display: 'flex', alignItems: 'center' }}>
                 <IndianRupee size={16} />
-                {v.overdueAmount.toLocaleString('en-IN')}
+                {(v.overdueAmount ?? 0).toLocaleString('en-IN')}
               </p>
             </div>
 

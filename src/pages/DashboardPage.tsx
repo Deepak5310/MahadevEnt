@@ -11,9 +11,8 @@ import {
 import { Spinner } from '../components/ui/Spinner'
 
 /**
- * DashboardPage — Central command center.
- * Assembles WelcomeBanner, StatCards, QuickActions, Attendance Breakdown, and Recent Activity Feed.
- * Uses TanStack Query for data fetching & cache management.
+ * DashboardPage — Executive Command Center.
+ * Assembles WelcomeBanner, Metric Cards, Quick Shortcuts, Attendance Breakdown, and Live Activity Feed.
  */
 export default function DashboardPage() {
   const { data: metrics, isLoading: isMetricsLoading } = useQuery({
@@ -29,13 +28,13 @@ export default function DashboardPage() {
   const isLoading = isMetricsLoading || isActivitiesLoading
 
   return (
-    <div className="page" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
+    <div className="page" style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem', width: '100%', maxWidth: '1400px', margin: '0 auto' }}>
       {/* Welcome Banner & Quick Punch Widget */}
       <WelcomeBanner />
 
       {isLoading && (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: 'var(--space-12)' }}>
-          <Spinner size="lg" color="var(--color-primary-400)" />
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
+          <Spinner size="lg" color="#818cf8" />
         </div>
       )}
 
@@ -44,16 +43,16 @@ export default function DashboardPage() {
           {/* Key Metric Stat Cards */}
           <MetricGrid metrics={metrics} />
 
-          {/* Quick Shortcuts */}
+          {/* Quick Action Shortcuts */}
           <QuickActions />
 
           {/* 2-Column Grid: Attendance Breakdown & Recent Activity */}
           <div
             style={{
-              display:               'grid',
-              gridTemplateColumns:   'repeat(auto-fit, minmax(340px, 1fr))',
-              gap:                   'var(--space-6)',
-              alignItems:            'start',
+              display:             'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+              gap:                 '1.75rem',
+              alignItems:          'start',
             }}
           >
             <AttendanceWidget metrics={metrics} />

@@ -9,32 +9,40 @@ interface ActivityFeedProps {
 
 export function ActivityFeed({ activities }: ActivityFeedProps) {
   return (
-    <Card title="Recent Activity">
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+    <Card title="Live Activity Stream">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
         {activities.map((item) => (
           <div
             key={item.id}
             style={{
+              position:       'relative',
               display:        'flex',
               alignItems:     'flex-start',
-              gap:            'var(--space-4)',
-              paddingBottom:  'var(--space-3)',
-              borderBottom:   '1px solid rgba(255, 255, 255, 0.05)',
+              gap:            '1rem',
+              padding:        '0.75rem',
+              borderRadius:   '0.75rem',
+              backgroundColor: 'rgba(255, 255, 255, 0.02)',
+              border:         '1px solid rgba(255, 255, 255, 0.04)',
+              transition:     'background-color 0.2s ease',
             }}
           >
-            <Avatar name={item.user.name} src={item.user.avatarUrl} size="sm" />
+            <Avatar name={item.user.name} src={item.user.avatarUrl} size="md" />
 
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--space-2)' }}>
-                <p style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--weight-semibold)', color: 'var(--color-text-primary)' }}>
-                  {item.user.name} — <span style={{ fontWeight: 'var(--weight-medium)' }}>{item.title}</span>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <p style={{ fontSize: '0.875rem', fontWeight: 600, color: '#f8fafc', margin: 0 }}>
+                  {item.user.name}
                 </p>
-                <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}>
+                <span style={{ fontSize: '0.75rem', color: '#64748b', whiteSpace: 'nowrap' }}>
                   {item.timestamp}
                 </span>
               </div>
 
-              <p style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)', marginTop: '0.15rem' }}>
+              <p style={{ fontSize: '0.8rem', color: '#38bdf8', fontWeight: 500, margin: '0.15rem 0' }}>
+                {item.title}
+              </p>
+
+              <p style={{ fontSize: '0.75rem', color: '#94a3b8', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {item.subtitle}
               </p>
             </div>

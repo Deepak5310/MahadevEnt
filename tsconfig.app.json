@@ -20,7 +20,11 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+
+    /* Path alias resolution is handled by vite.config.ts resolve.alias.
+       The TS language server picks this up via the Vite plugin.
+       No baseUrl/paths needed here — avoids TS6 deprecation + tsgolint conflict. */
   },
   "include": ["src"]
 }

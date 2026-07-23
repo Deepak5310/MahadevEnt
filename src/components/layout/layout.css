@@ -1,0 +1,277 @@
+/* ============================================================
+   layout.css — Structural styles for the app shell.
+   All values use design tokens from index.css.
+   ============================================================ */
+
+/* ── Shell Wrapper ───────────────────────────────────────── */
+
+.layout-shell {
+  min-height: 100dvh;
+  background-color: var(--color-bg-base);
+}
+
+/* ── Sidebar ──────────────────────────────────────────────── */
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  height: 100dvh;
+  background-color: var(--color-bg-surface);
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition:
+    width var(--transition-base),
+    border-color var(--transition-base);
+  z-index: var(--z-sticky);
+}
+
+.sidebar.sidebar--collapsed {
+  width: var(--sidebar-width-collapsed);
+}
+
+/* Brand */
+.sidebar-brand {
+  height: var(--topbar-height);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+  gap: var(--space-3);
+  overflow: hidden;
+}
+
+.sidebar-brand-name {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  opacity: 1;
+  transition: opacity var(--transition-fast);
+}
+
+.sidebar--collapsed .sidebar-brand-name {
+  opacity: 0;
+  width: 0;
+  pointer-events: none;
+}
+
+/* Navigation */
+.sidebar-nav {
+  flex: 1;
+  padding: var(--space-3) 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  border-radius: var(--radius-lg);
+  margin: 0 var(--space-2);
+  white-space: nowrap;
+  overflow: hidden;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.sidebar-nav-item:hover {
+  background-color: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+}
+
+.sidebar-nav-item.active {
+  background-color: var(--color-primary-600);
+  color: #fff;
+}
+
+.sidebar-nav-label {
+  opacity: 1;
+  transition: opacity var(--transition-fast);
+  overflow: hidden;
+}
+
+.sidebar--collapsed .sidebar-nav-label {
+  opacity: 0;
+  width: 0;
+  pointer-events: none;
+}
+
+/* Sidebar footer */
+.sidebar-footer {
+  border-top: 1px solid var(--color-border);
+  padding: var(--space-3) var(--space-4);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  overflow: hidden;
+}
+
+.sidebar-footer-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 1;
+  transition: opacity var(--transition-fast);
+}
+
+.sidebar--collapsed .sidebar-footer-label {
+  opacity: 0;
+  width: 0;
+  pointer-events: none;
+}
+
+/* ── Content Area ─────────────────────────────────────────── */
+
+.layout-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  margin-left: var(--sidebar-width);
+  transition: margin-left var(--transition-base);
+}
+
+.layout-shell.layout-shell--collapsed .layout-content {
+  margin-left: var(--sidebar-width-collapsed);
+}
+
+/* ── Top Bar ──────────────────────────────────────────────── */
+
+.topbar {
+  height: var(--topbar-height);
+  background-color: var(--color-bg-surface);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-6);
+  gap: var(--space-4);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-raised);
+  flex-shrink: 0;
+}
+
+.topbar-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-md);
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.topbar-toggle:hover {
+  background-color: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+}
+
+.topbar-spacer {
+  flex: 1;
+}
+
+.topbar-user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.topbar-avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary-600);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+/* ── Main Content ─────────────────────────────────────────── */
+
+.layout-main {
+  flex: 1;
+  padding: var(--space-6);
+  overflow-y: auto;
+}
+
+/* ── Page Base (used by all placeholder pages) ────────────── */
+
+.page {}
+
+.page-header {
+  margin-bottom: var(--space-6);
+}
+
+.page-title {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.page-description {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: var(--leading-relaxed);
+}
+
+/* ── Placeholder card (for empty module pages) ────────────── */
+
+.placeholder-card {
+  margin-top: var(--space-6);
+  padding: var(--space-10);
+  background-color: var(--color-bg-surface);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-xl);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.placeholder-card-icon {
+  color: var(--color-text-muted);
+  opacity: 0.5;
+}
+
+.placeholder-card-title {
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-secondary);
+}
+
+.placeholder-card-text {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  max-width: 28rem;
+}

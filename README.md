@@ -1,32 +1,73 @@
-# React + TypeScript + Vite
+## Mahadev Enterprise — Office Management System
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Internal web application for managing employees, attendance, field visits, and leave workflows at Mahadev Enterprise.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Tech Stack
 
-## React Compiler
+| Layer | Technology |
+|---|---|
+| Framework | React 19 + TypeScript 6 |
+| Bundler | Vite 8 (Oxc transform) |
+| Linting | Oxlint (type-aware) |
+| Styling | Vanilla CSS with design tokens |
+| State (global) | Zustand *(Step 2)* |
+| State (server) | TanStack Query *(Step 2)* |
+| Routing | React Router v7 *(Step 2)* |
+| Forms | React Hook Form + Zod *(Step 2)* |
+| Icons | Lucide React *(Step 2)* |
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the Oxlint configuration
+## Project Structure
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```
+src/
+├── assets/              Static images and brand assets
+├── components/
+│   ├── ui/              Atomic UI components (Button, Badge, Modal…)
+│   └── layout/          Layout shell (MainLayout, Sidebar, Topbar)
+├── hooks/               Custom React hooks
+├── modules/             Feature slices — self-contained business logic
+│   ├── auth/
+│   ├── dashboard/
+│   ├── employees/
+│   ├── attendance/
+│   ├── field-visits/
+│   └── leaves/
+├── pages/               Thin route-entry wrappers
+├── routes/              AppRoutes + ProtectedRoute
+├── services/            API client, mock data, storage helpers
+├── stores/              Zustand global state stores
+├── types/               Shared TypeScript types and interfaces
+└── utils/               Pure utility functions
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+---
+
+## Local Development
+
+```bash
+npm install
+npm run dev        # starts at http://localhost:5173
+```
+
+```bash
+npm run lint       # run oxlint
+npm run build      # production build (tsc + vite build)
+npm run preview    # preview the production build
+```
+
+---
+
+## Modules
+
+| Module | Description |
+|---|---|
+| **Auth** | Login, session, role-based access |
+| **Dashboard** | Overview stats, activity, quick actions |
+| **Employees** | Employee profiles, add/edit/deactivate |
+| **Attendance** | Punch in/out, leave requests, records |
+| **Field Visits** | Assign, track, and complete field visits |
+| **Leaves** | Leave applications and approval workflow |

@@ -1,11 +1,11 @@
 import { useNavigate } from 'react-router-dom'
-import { PanelLeftClose, PanelLeftOpen, LogOut, Building2 } from 'lucide-react'
+import { PanelLeftClose, PanelLeftOpen, LogOut } from 'lucide-react'
 import { useUIStore }  from '../../stores/useUIStore'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { authService } from '../../services/authService'
 
 /**
- * Topbar — Premium Glassmorphic Header with Location Badge & User Capsule.
+ * Topbar — Minimal, ultra-clean, non-overflowing header.
  */
 export function Topbar() {
   const isSidebarCollapsed = useUIStore((s) => s.isSidebarCollapsed)
@@ -28,100 +28,79 @@ export function Topbar() {
   return (
     <header className="topbar" role="banner">
 
-      {/* Sidebar toggle & App Title */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
-        <button
-          type="button"
-          className="topbar-toggle"
-          onClick={toggleSidebar}
-          aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        >
-          {isSidebarCollapsed
-            ? <PanelLeftOpen  size={18} aria-hidden="true" />
-            : <PanelLeftClose size={18} aria-hidden="true" />
-          }
-        </button>
-
-        {/* Portal location indicator */}
-        <div
-          style={{
-            display:         'flex',
-            alignItems:      'center',
-            gap:             '0.5rem',
-            padding:         '0.25rem 0.65rem',
-            backgroundColor: 'rgba(255, 255, 255, 0.03)',
-            border:          '1px solid rgba(255, 255, 255, 0.06)',
-            borderRadius:    '0.5rem',
-          }}
-        >
-          <Building2 size={15} color="#818cf8" />
-          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#f8fafc', letterSpacing: '-0.01em' }}>
-            Mahadev Enterprise
-          </span>
-        </div>
-      </div>
+      {/* Sidebar toggle */}
+      <button
+        type="button"
+        className="topbar-toggle"
+        onClick={toggleSidebar}
+        aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+      >
+        {isSidebarCollapsed
+          ? <PanelLeftOpen  size={18} aria-hidden="true" />
+          : <PanelLeftClose size={18} aria-hidden="true" />
+        }
+      </button>
 
       <div className="topbar-spacer" />
 
-      {/* User identity & Sign Out */}
+      {/* User profile & compact Sign Out */}
       {user && (
-        <div className="topbar-user-capsule">
-          {/* User Avatar */}
-          <div className="topbar-avatar" aria-label={`Logged in as ${user.name}`}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', flexShrink: 0 }}>
+          {/* User initials circle */}
+          <div
+            style={{
+              width:          '2rem',
+              height:         '2rem',
+              borderRadius:   '50%',
+              background:     'linear-gradient(135deg, #6366f1, #4f46e5)',
+              display:        'flex',
+              alignItems:     'center',
+              justifyContent: 'center',
+              fontSize:       '0.75rem',
+              fontWeight:     700,
+              color:          '#ffffff',
+              flexShrink:     0,
+              boxShadow:      '0 2px 6px rgba(99, 102, 241, 0.4)',
+            }}
+            title={user.name}
+          >
             {initials}
           </div>
 
-          {/* User Info */}
-          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-            <span
-              style={{
-                fontSize:     '0.8rem',
-                fontWeight:   600,
-                color:        '#f8fafc',
-                whiteSpace:   'nowrap',
-                overflow:     'hidden',
-                textOverflow: 'ellipsis',
-                maxWidth:     '110px',
-                lineHeight:   1.2,
-              }}
-            >
-              {user.name}
-            </span>
-            <span style={{ fontSize: '0.68rem', fontWeight: 500, color: user.role === 'admin' ? '#818cf8' : '#38bdf8', textTransform: 'capitalize' }}>
-              {user.role}
-            </span>
-          </div>
+          {/* User Name */}
+          <span
+            style={{
+              fontSize:     '0.85rem',
+              fontWeight:   600,
+              color:        '#f8fafc',
+              whiteSpace:   'nowrap',
+              overflow:     'hidden',
+              textOverflow: 'ellipsis',
+              maxWidth:     '110px',
+            }}
+          >
+            {user.name.split(' ')[0]}
+          </span>
 
-          {/* Divider */}
-          <div style={{ width: '1px', height: '1.25rem', backgroundColor: 'rgba(255, 255, 255, 0.1)', margin: '0 0.1rem' }} />
-
-          {/* Sign Out Action */}
+          {/* Sign Out Button (Icon + Label) */}
           <button
             type="button"
             onClick={() => { void handleLogout() }}
             style={{
-              display:         'flex',
+              display:         'inline-flex',
               alignItems:      'center',
-              justifyContent:  'center',
               gap:             '0.3rem',
               padding:         '0.3rem 0.6rem',
-              background:      'rgba(239, 68, 68, 0.15)',
-              border:          '1px solid rgba(239, 68, 68, 0.3)',
-              borderRadius:    '9999px',
+              backgroundColor: 'rgba(239, 68, 68, 0.12)',
+              border:          '1px solid rgba(239, 68, 68, 0.25)',
+              borderRadius:    '0.5rem',
               color:           '#f87171',
-              fontSize:        '0.72rem',
+              fontSize:        '0.75rem',
               fontWeight:      600,
               cursor:          'pointer',
               whiteSpace:      'nowrap',
               transition:      'all 0.15s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(239, 68, 68, 0.25)'
-              e.currentTarget.style.color = '#ffffff'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'
-              e.currentTarget.style.color = '#f87171'
+              flexShrink:      0,
             }}
             title="Sign out"
           >

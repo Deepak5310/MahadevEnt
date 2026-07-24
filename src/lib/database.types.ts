@@ -57,6 +57,40 @@ export interface Database {
           updated_at?: string
         }
       }
+      attendance: {
+        Row: {
+          id:             string
+          user_id:        string
+          employee_name:  string | null
+          employee_email: string | null
+          date:           string
+          punch_in_time:  string
+          punch_out_time: string | null
+          working_hours:  string | null
+          status:         'present' | 'late' | 'absent' | 'half_day' | 'field_visit'
+          notes:          string | null
+          created_at:     string
+        }
+        Insert: {
+          id?:            string
+          user_id:        string
+          employee_name?: string | null
+          employee_email?: string | null
+          date:           string
+          punch_in_time:  string
+          punch_out_time?: string | null
+          working_hours?:  string | null
+          status?:         'present' | 'late' | 'absent' | 'half_day' | 'field_visit'
+          notes?:          string | null
+          created_at?:     string
+        }
+        Update: {
+          punch_out_time?: string | null
+          working_hours?:  string | null
+          status?:         'present' | 'late' | 'absent' | 'half_day' | 'field_visit'
+          notes?:          string | null
+        }
+      }
     }
     Views:     Record<string, never>
     Functions: Record<string, never>

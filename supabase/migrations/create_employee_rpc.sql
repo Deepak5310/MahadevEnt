@@ -71,13 +71,21 @@ BEGIN
     ''
   );
 
-  -- 4. Insert into public.profiles directly
+  -- 4. Upsert into public.profiles directly (prevents duplicate key error if auto-trigger exists)
   INSERT INTO public.profiles (
     id, full_name, email, role, department, designation, phone, is_active
   )
   VALUES (
     new_user_id, emp_full_name, emp_email, emp_role, emp_department, emp_designation, emp_phone, true
-  );
+  )
+  ON CONFLICT (id) DO UPDATE SET
+    full_name   = EXCLUDED.full_name,
+    email       = EXCLUDED.email,
+    role        = EXCLUDED.role,
+    department  = EXCLUDED.department,
+    designation = EXCLUDED.designation,
+    phone       = EXCLUDED.phone,
+    is_active   = EXCLUDED.is_active;
 
   RETURN new_user_id;
 END;

@@ -39,17 +39,17 @@ export function AttendanceLogTable({ records, onEditPunch }: AttendanceLogTableP
     return (
       <div
         style={{
-          padding:         '3rem 1.5rem',
+          padding:         '2.5rem 1.25rem',
           textAlign:       'center',
           backgroundColor: 'rgba(30, 41, 59, 0.4)',
           border:          '1px dashed rgba(255, 255, 255, 0.1)',
-          borderRadius:    '1rem',
+          borderRadius:    '0.75rem',
           color:           '#94a3b8',
         }}
       >
-        <FileCheck size={36} color="#64748b" style={{ marginBottom: '0.5rem' }} />
-        <p style={{ fontSize: '1rem', fontWeight: 600, color: '#f8fafc', margin: 0 }}>No attendance records found</p>
-        <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '0.25rem 0 0 0' }}>Adjust your filters to see more daily logs.</p>
+        <FileCheck size={32} color="#64748b" style={{ marginBottom: '0.4rem' }} />
+        <p style={{ fontSize: '0.9rem', fontWeight: 600, color: '#f8fafc', margin: 0 }}>No attendance records found</p>
+        <p style={{ fontSize: '0.75rem', color: '#64748b', margin: '0.2rem 0 0 0' }}>Adjust your search filter or date query.</p>
       </div>
     )
   }
@@ -59,9 +59,9 @@ export function AttendanceLogTable({ records, onEditPunch }: AttendanceLogTableP
       style={{
         backgroundColor: 'rgba(30, 41, 59, 0.5)',
         border:          '1px solid rgba(255, 255, 255, 0.08)',
-        borderRadius:    '1rem',
+        borderRadius:    '0.75rem',
         overflow:        'hidden',
-        boxShadow:       '0 10px 30px -10px rgba(0,0,0,0.3)',
+        boxShadow:       '0 8px 24px -8px rgba(0,0,0,0.3)',
       }}
     >
       <div style={{ overflowX: 'auto' }}>
@@ -70,7 +70,7 @@ export function AttendanceLogTable({ records, onEditPunch }: AttendanceLogTableP
             width:          '100%',
             borderCollapse: 'collapse',
             textAlign:      'left',
-            fontSize:       '0.875rem',
+            fontSize:       '0.8rem',
           }}
         >
           <thead>
@@ -79,19 +79,19 @@ export function AttendanceLogTable({ records, onEditPunch }: AttendanceLogTableP
                 backgroundColor: 'rgba(15, 23, 42, 0.7)',
                 borderBottom:    '1px solid rgba(255, 255, 255, 0.08)',
                 color:           '#94a3b8',
-                fontSize:        '0.75rem',
+                fontSize:        '0.7rem',
                 textTransform:   'uppercase',
                 letterSpacing:   '0.05em',
               }}
             >
-              <th style={{ padding: '0.875rem 1.25rem' }}>Employee</th>
-              <th style={{ padding: '0.875rem 1rem' }}>Date</th>
-              <th style={{ padding: '0.875rem 1rem' }}>Punch In</th>
-              <th style={{ padding: '0.875rem 1rem' }}>Punch Out</th>
-              <th style={{ padding: '0.875rem 1rem' }}>Hours</th>
-              <th style={{ padding: '0.875rem 1rem' }}>Status</th>
-              <th style={{ padding: '0.875rem 1.25rem' }}>Location Stamp</th>
-              {isAdmin && <th style={{ padding: '0.875rem 1.25rem', textAlign: 'right' }}>Admin Action</th>}
+              <th style={{ padding: '0.75rem 0.875rem' }}>Employee</th>
+              <th style={{ padding: '0.75rem 0.75rem' }}>Date</th>
+              <th style={{ padding: '0.75rem 0.75rem' }}>Punch In</th>
+              <th style={{ padding: '0.75rem 0.75rem' }}>Punch Out</th>
+              <th style={{ padding: '0.75rem 0.75rem' }}>Hours</th>
+              <th style={{ padding: '0.75rem 0.75rem' }}>Status</th>
+              <th style={{ padding: '0.75rem 0.875rem' }}>Location Stamp</th>
+              {isAdmin && <th style={{ padding: '0.75rem 0.875rem', textAlign: 'right' }}>Admin Action</th>}
             </tr>
           </thead>
           <tbody>
@@ -106,48 +106,48 @@ export function AttendanceLogTable({ records, onEditPunch }: AttendanceLogTableP
                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
               >
                 {/* Employee Name */}
-                <td style={{ padding: '0.875rem 1.25rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <Avatar name={rec.employeeName} src={rec.avatarUrl} size="md" />
+                <td style={{ padding: '0.65rem 0.875rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                    <Avatar name={rec.employeeName} src={rec.avatarUrl} size="sm" />
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span style={{ fontWeight: 600, color: '#f8fafc' }}>{rec.employeeName}</span>
-                      <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{rec.department || 'Staff'}</span>
+                      <span style={{ fontWeight: 600, color: '#f8fafc', fontSize: '0.8rem' }}>{rec.employeeName}</span>
+                      <span style={{ fontSize: '0.72rem', color: '#64748b' }}>{rec.employeeEmail || 'Staff'}</span>
                     </div>
                   </div>
                 </td>
 
                 {/* Date */}
-                <td style={{ padding: '0.875rem 1rem', color: '#cbd5e1', fontWeight: 500 }}>
+                <td style={{ padding: '0.65rem 0.75rem', color: '#cbd5e1', fontWeight: 500 }}>
                   {rec.date}
                 </td>
 
                 {/* Punch In */}
-                <td style={{ padding: '0.875rem 1rem', color: '#4ade80', fontWeight: 600 }}>
+                <td style={{ padding: '0.65rem 0.75rem', color: '#4ade80', fontWeight: 600 }}>
                   {rec.punchInTime}
                 </td>
 
                 {/* Punch Out */}
-                <td style={{ padding: '0.875rem 1rem', color: rec.punchOutTime ? '#f87171' : '#64748b', fontWeight: 600 }}>
+                <td style={{ padding: '0.65rem 0.75rem', color: rec.punchOutTime ? '#f87171' : '#64748b', fontWeight: 600 }}>
                   {rec.punchOutTime || 'Active Shift'}
                 </td>
 
                 {/* Working Hours */}
-                <td style={{ padding: '0.875rem 1rem', color: '#cbd5e1' }}>
+                <td style={{ padding: '0.65rem 0.75rem', color: '#cbd5e1' }}>
                   {rec.workingHours || '—'}
                 </td>
 
                 {/* Status */}
-                <td style={{ padding: '0.875rem 1rem' }}>
+                <td style={{ padding: '0.65rem 0.75rem' }}>
                   <Badge variant={getStatusBadgeVariant(rec.status)} size="sm">
                     {formatStatusText(rec.status)}
                   </Badge>
                 </td>
 
                 {/* Location Stamp */}
-                <td style={{ padding: '0.875rem 1.25rem', color: '#94a3b8', fontSize: '0.8rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                    <MapPin size={13} color="#818cf8" style={{ flexShrink: 0 }} />
-                    <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '180px' }}>
+                <td style={{ padding: '0.65rem 0.875rem', color: '#94a3b8', fontSize: '0.78rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                    <MapPin size={12} color="#818cf8" style={{ flexShrink: 0 }} />
+                    <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '160px' }}>
                       {rec.locationIn || 'Head Office'}
                     </span>
                   </div>
@@ -155,7 +155,7 @@ export function AttendanceLogTable({ records, onEditPunch }: AttendanceLogTableP
 
                 {/* Admin Action: Edit Punch */}
                 {isAdmin && (
-                  <td style={{ padding: '0.875rem 1.25rem', textAlign: 'right' }}>
+                  <td style={{ padding: '0.65rem 0.875rem', textAlign: 'right' }}>
                     {onEditPunch && (
                       <button
                         type="button"
@@ -163,18 +163,18 @@ export function AttendanceLogTable({ records, onEditPunch }: AttendanceLogTableP
                         style={{
                           display:         'inline-flex',
                           alignItems:      'center',
-                          gap:             '0.35rem',
-                          padding:         '0.35rem 0.75rem',
+                          gap:             '0.3rem',
+                          padding:         '0.25rem 0.6rem',
                           backgroundColor: 'rgba(99, 102, 241, 0.15)',
                           border:          '1px solid rgba(99, 102, 241, 0.3)',
-                          borderRadius:    '0.5rem',
+                          borderRadius:    '0.4rem',
                           color:           '#a5b4fc',
-                          fontSize:        '0.75rem',
+                          fontSize:        '0.72rem',
                           fontWeight:      600,
                           cursor:          'pointer',
                         }}
                       >
-                        <Edit3 size={13} />
+                        <Edit3 size={12} />
                         Edit Punch
                       </button>
                     )}

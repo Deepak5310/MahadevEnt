@@ -17,8 +17,7 @@ import {
 import { Spinner } from '../components/ui/Spinner'
 
 /**
- * EmployeesPage — Central Employee Management Hub.
- * Features: Staff statistics, live search & filtering, data table, add/edit profile modal, role assignments.
+ * EmployeesPage — Central Employee Management Directory.
  */
 export default function EmployeesPage() {
   const queryClient = useQueryClient()
@@ -92,15 +91,15 @@ export default function EmployeesPage() {
   }
 
   return (
-    <div className="page" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '1400px', margin: '0 auto' }}>
+    <div className="page" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', maxWidth: '1400px', margin: '0 auto' }}>
       
-      {/* Page Header */}
+      {/* Page Header — Standardized with Attendance & Dashboard */}
       <div>
-        <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#f8fafc', margin: 0, letterSpacing: '-0.02em' }}>
+        <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f8fafc', margin: 0, letterSpacing: '-0.02em' }}>
           Employees Directory
         </h1>
-        <p style={{ fontSize: '0.875rem', color: '#94a3b8', margin: '0.25rem 0 0 0' }}>
-          Manage employee profiles, role assignments, departments, and active statuses.
+        <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: '0.2rem 0 0 0' }}>
+          Manage employee profiles, designations, and active status credentials.
         </p>
       </div>
 
@@ -116,7 +115,7 @@ export default function EmployeesPage() {
 
       {/* Data Table */}
       {isLoading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '240px' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
           <Spinner size="lg" color="#818cf8" />
         </div>
       ) : (

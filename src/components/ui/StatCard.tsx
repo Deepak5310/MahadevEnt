@@ -16,6 +16,7 @@ interface StatCardProps {
   icon:       ReactNode
   trend?:     StatTrend
   color?:     StatColor
+  subtitle?:  string
   className?: string
 }
 
@@ -30,6 +31,7 @@ export function StatCard({
   icon,
   trend,
   color     = 'primary',
+  subtitle,
   className,
 }: StatCardProps) {
   return (
@@ -58,6 +60,9 @@ export function StatCard({
       <div>
         <p className="stat-card-value">{value}</p>
         <p className="stat-card-label">{title}</p>
+        {subtitle && (
+          <p style={{ fontSize: '0.7rem', color: '#64748b', margin: '0.2rem 0 0 0' }}>{subtitle}</p>
+        )}
       </div>
     </div>
   )

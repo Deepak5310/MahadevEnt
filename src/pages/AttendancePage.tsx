@@ -1,10 +1,9 @@
-import { useEffect, useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useAuthStore } from '../stores/useAuthStore'
+import { useEffect, useState }                       from 'react'
+import { useQuery, useMutation, useQueryClient }     from '@tanstack/react-query'
+import { useAuthStore }       from '../stores/useAuthStore'
+import { useAttendanceStore } from '../stores/useAttendanceStore'
 import {
   getTodayPunchStatus,
-  punchIn,
-  punchOut,
   getAttendanceLogs,
   adminMarkAttendance,
   subscribeToAttendanceChanges,
@@ -13,167 +12,126 @@ import {
   AttendanceFiltersBar,
   AttendanceLogTable,
   EditAttendanceModal,
+  AttendanceCalendar,
   type AttendanceRecord,
   type AttendanceFiltersState,
   type AdminMarkAttendanceInput,
 } from '../modules/attendance'
 import { Spinner } from '../components/ui/Spinner'
 
-/**
- * AttendancePage — Uncluttered, High-Performance Attendance Hub.
- */
 export default function AttendancePage() {
   const user        = useAuthStore((s) => s.user)
   const isAdmin     = user?.role === 'admin'
   const queryClient = useQueryClient()
+  const { todayRecord, setTodayRecord } = useAttendanceStore()
 
-  // Filter state
-  const [filters, setFilters] = useState<AttendanceFiltersState>({
-    search:     '',
-    status:     'all',
-    department: 'all',
-    date:       'today',
+  const [filters, setFilters]       = useState<AttendanceFiltersState>({ search: '', status: 'all', department: 'all', date: 'today' })
+  const [isEditOpen, setIsEditOpen] = useState(false)
+  const [selectedRec, setSelectedRec] = useState<AttendanceRecord | null>(null)
+
+  // Load today's punch into shared store on mount (employee only)
+  useQuery({
+    queryKey: ['today-punch', user?.id],
+    queryFn:  async () => {
+      const r = await getTodayPunchStatus(user?.id ?? 'guest')
+      setTodayRecord(r)
+      return r
+    },
+    enabled:   !isAdmin && Boolean(user?.id) && !todayRecord,
+    staleTime: 0,
   })
 
-  // Modal State for Admin Manual Edit
-  const [isEditModalOpen, setIsEditModalOpen]       = useState(false)
-  const [selectedRecord, setSelectedRecord]         = useState<AttendanceRecord | null>(null)
-
-  // Real-time Supabase Subscription for live punches
+  // Realtime subscription for live updates
   useEffect(() => {
-    const unsubscribe = subscribeToAttendanceChanges(() => {
+    return subscribeToAttendanceChanges(() => {
       void queryClient.invalidateQueries({ queryKey: ['today-punch'] })
       void queryClient.invalidateQueries({ queryKey: ['attendance-logs'] })
     })
-    return () => {
-      unsubscribe()
-    }
   }, [queryClient])
 
-  // Queries
-  const { data: currentRecord } = useQuery({
-    queryKey: ['today-punch', user?.id],
-    queryFn:  () => getTodayPunchStatus(user?.id ?? 'guest'),
-    enabled:  Boolean(user?.id),
-  })
-
-  const { data: logs = [], isLoading: isLogsLoading } = useQuery({
+  const { data: logs = [], isLoading } = useQuery({
     queryKey: ['attendance-logs', filters],
     queryFn:  () => getAttendanceLogs(filters),
   })
 
-  // Filter personal logs for regular employees
+  // Employee sees only their own records
   const displayLogs = isAdmin
     ? logs
     : logs.filter((l) => l.userId === user?.id || l.employeeEmail === user?.email)
 
-  // Mutations
-  const punchInMutation = useMutation({
-    mutationFn: ({ notes }: { notes?: string }) =>
-      punchIn({ userId: user?.id ?? 'guest', employeeName: user?.name, employeeEmail: user?.email, notes }),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['today-punch'] })
-      void queryClient.invalidateQueries({ queryKey: ['attendance-logs'] })
-    },
-  })
-
-  const punchOutMutation = useMutation({
-    mutationFn: ({ notes }: { notes?: string }) =>
-      punchOut({ userId: user?.id ?? 'guest', notes }),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['today-punch'] })
-      void queryClient.invalidateQueries({ queryKey: ['attendance-logs'] })
-    },
-  })
-
   const adminEditMutation = useMutation({
     mutationFn: (input: AdminMarkAttendanceInput) => adminMarkAttendance(input),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['today-punch'] })
-      void queryClient.invalidateQueries({ queryKey: ['attendance-logs'] })
-    },
+    onSuccess:  () => { void queryClient.invalidateQueries({ queryKey: ['attendance-logs'] }) },
   })
 
-  async function handlePunchIn(notes?: string) {
-    await punchInMutation.mutateAsync({ notes })
-  }
-
-  async function handlePunchOut(notes?: string) {
-    await punchOutMutation.mutateAsync({ notes })
-  }
-
   function handleEditPunch(record: AttendanceRecord) {
-    setSelectedRecord(record)
-    setIsEditModalOpen(true)
+    setSelectedRec(record)
+    setIsEditOpen(true)
   }
 
   function handleManualAdd() {
-    setSelectedRecord(null)
-    setIsEditModalOpen(true)
+    setSelectedRec(null)
+    setIsEditOpen(true)
   }
 
-  async function handleAdminSave(input: AdminMarkAttendanceInput) {
-    await adminEditMutation.mutateAsync(input)
+  // ── Employee View ──────────────────────────────────────────────
+  if (!isAdmin) {
+    return (
+      <div className="page" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', maxWidth: '1400px', margin: '0 auto' }}>
+        <div>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f8fafc', margin: 0, letterSpacing: '-0.02em' }}>
+            My Attendance
+          </h1>
+          <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: '0.2rem 0 0 0' }}>
+            Track your daily shifts and monthly attendance history.
+          </p>
+        </div>
+
+        {/* Punch Card */}
+        <PunchWidgetCard />
+
+        {/* Monthly Calendar */}
+        {isLoading ? (
+          <div style={{ display: 'flex', justifyContent: 'center', minHeight: '200px', alignItems: 'center' }}>
+            <Spinner size="lg" color="#818cf8" />
+          </div>
+        ) : (
+          <AttendanceCalendar records={displayLogs} userId={user?.id ?? ''} />
+        )}
+      </div>
+    )
   }
 
-  const isSubmitting = punchInMutation.isPending || punchOutMutation.isPending
-
+  // ── Admin View ────────────────────────────────────────────────
   return (
     <div className="page" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', maxWidth: '1400px', margin: '0 auto' }}>
-      
-      {/* Page Header */}
       <div>
         <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f8fafc', margin: 0, letterSpacing: '-0.02em' }}>
-          {isAdmin ? 'Live Attendance Management' : 'My Shift & Attendance'}
+          Live Attendance Management
         </h1>
         <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: '0.2rem 0 0 0' }}>
-          {isAdmin
-            ? 'Live real-time staff punch feed with manual edit controls.'
-            : 'Clock in/out for daily shifts and view your punch history.'}
+          Real-time staff punch feed with manual edit controls.
         </p>
       </div>
 
-      {/* Live Punch Card for Employee */}
-      {!isAdmin && (
-        <PunchWidgetCard
-          currentRecord={currentRecord ?? null}
-          onPunchIn={handlePunchIn}
-          onPunchOut={handlePunchOut}
-          isSubmitting={isSubmitting}
-        />
-      )}
+      <AttendanceSummaryCards records={logs} />
 
-      {/* Summary Stat Cards for Admin */}
-      {isAdmin && <AttendanceSummaryCards records={logs} />}
+      <AttendanceFiltersBar filters={filters} onChange={setFilters} onAddManualClick={handleManualAdd} />
 
-      {/* Log Filters Bar (Admin Only) */}
-      {isAdmin && (
-        <AttendanceFiltersBar
-          filters={filters}
-          onChange={setFilters}
-          onAddManualClick={handleManualAdd}
-        />
-      )}
-
-      {/* Attendance Log Table */}
-      {isLogsLoading ? (
+      {isLoading ? (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
           <Spinner size="lg" color="#818cf8" />
         </div>
       ) : (
-        <AttendanceLogTable
-          records={displayLogs}
-          onEditPunch={handleEditPunch}
-        />
+        <AttendanceLogTable records={displayLogs} onEditPunch={handleEditPunch} />
       )}
 
-      {/* Edit / Manual Attendance Modal for Admin */}
-      {isEditModalOpen && (
+      {isEditOpen && (
         <EditAttendanceModal
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          onSubmit={handleAdminSave}
-          initialRecord={selectedRecord}
+          isOpen={isEditOpen}
+          onClose={() => setIsEditOpen(false)}
+          onSubmit={async (input) => { await adminEditMutation.mutateAsync(input) }}
+          initialRecord={selectedRec}
         />
       )}
     </div>

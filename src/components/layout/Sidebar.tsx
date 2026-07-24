@@ -51,6 +51,9 @@ export function Sidebar() {
           <NavLink
             key={to}
             to={to}
+            onClick={() => {
+              useUIStore.getState().closeSidebarOnMobile()
+            }}
             className={({ isActive }) =>
               `sidebar-nav-item${isActive ? ' active' : ''}`
             }

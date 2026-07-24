@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { Building2, Mail, Lock, AlertCircle, ShieldCheck } from 'lucide-react'
 import { authService } from '../services/authService'
 import { useAuthStore } from '../stores/useAuthStore'
+import { useUIStore }   from '../stores/useUIStore'
 import { Button, Input } from '../components/ui'
 
 // ── Zod schema ─────────────────────────────────────────────────
@@ -43,6 +44,8 @@ export default function LoginPage() {
       setServerError(result.error)
       return
     }
+    // Ensure mobile sidebar is closed on successful login
+    useUIStore.getState().closeSidebarOnMobile()
     void navigate('/dashboard', { replace: true })
   }
 

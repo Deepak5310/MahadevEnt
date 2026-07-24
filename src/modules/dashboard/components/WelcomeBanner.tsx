@@ -74,7 +74,7 @@ export function WelcomeBanner() {
             }}
           >
             <Sparkles size={12} color="#818cf8" />
-            <span>LOAN RECOVERY AGENCY HUB</span>
+            <span>{user?.role === 'admin' ? 'MANAGEMENT CONTROL HUB' : 'PERSONAL TIME CLOCK HUB'}</span>
           </span>
 
           <Badge variant={user?.role === 'admin' ? 'primary' : 'info'} size="sm">

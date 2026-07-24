@@ -21,15 +21,12 @@ function getLocalLogs(): AttendanceRecord[] {
 function saveLocalLogs(logs: AttendanceRecord[]) {
   try {
     localStorage.setItem(LS_KEY, JSON.stringify(logs))
-  } catch {
-    /* storage full — ignore */
-  }
+  } catch { /* storage full */ }
 }
 
-/** Compute working hours string between two "hh:mm a" time strings on the same day. */
 function calcWorkingHours(inTime: string, outTime: string): string {
   try {
-    const base = new Date()
+    const base    = new Date()
     const inDate  = parse(inTime,  'hh:mm a', base)
     const outDate = parse(outTime, 'hh:mm a', base)
     const mins    = differenceInMinutes(outDate, inDate)
@@ -40,7 +37,24 @@ function calcWorkingHours(inTime: string, outTime: string): string {
   }
 }
 
-/** Realtime listener — triggers `onChange` on any attendance table mutation. */
+/** Map a Supabase row to our AttendanceRecord shape. */
+function rowToRecord(d: any): AttendanceRecord {
+  return {
+    id:            d.id,
+    userId:        d.user_id,
+    employeeName:  d.employee_name  ?? 'Staff Member',
+    employeeEmail: d.employee_email ?? '',
+    date:          d.date,
+    punchInTime:   d.punch_in_time,
+    punchOutTime:  d.punch_out_time  ?? undefined,
+    workingHours:  d.working_hours   ?? undefined,
+    status:        d.status          ?? 'present',
+    notes:         d.notes           ?? undefined,
+    createdAt:     d.created_at,
+  }
+}
+
+/** Realtime listener for live punch updates. */
 export function subscribeToAttendanceChanges(onChange: () => void) {
   const channel = supabase
     .channel('public:attendance')
@@ -50,75 +64,84 @@ export function subscribeToAttendanceChanges(onChange: () => void) {
 }
 
 export async function getTodayPunchStatus(userId: string): Promise<AttendanceRecord | null> {
-  const todayStr   = format(new Date(), 'yyyy-MM-dd')
-  const localLogs  = getLocalLogs()
-  const localToday = localLogs.find((l) => l.userId === userId && l.date === todayStr && !l.punchOutTime)
-  if (localToday) return localToday
+  const todayStr = format(new Date(), 'yyyy-MM-dd')
 
+  // Check Supabase first — it's the source of truth
   try {
-    const { data } = await (supabase.from('attendance') as any)
+    const { data, error } = await (supabase.from('attendance') as any)
       .select('*')
       .eq('user_id', userId)
       .eq('date', todayStr)
+      .is('punch_out_time', null)
       .maybeSingle()
 
-    if (data) {
-      return {
-        id:            data.id,
-        userId:        data.user_id,
-        employeeName:  data.employee_name  ?? 'Employee',
-        employeeEmail: data.employee_email ?? '',
-        date:          data.date,
-        punchInTime:   data.punch_in_time,
-        punchOutTime:  data.punch_out_time  ?? undefined,
-        workingHours:  data.working_hours   ?? undefined,
-        status:        data.status          ?? 'present',
-        notes:         data.notes           ?? undefined,
-        createdAt:     data.created_at,
-      }
-    }
+    if (error) console.warn('[attendance] getTodayPunchStatus error:', error.message)
+    if (data) return rowToRecord(data)
   } catch (err) {
-    console.warn('[attendanceService] getTodayPunchStatus:', err)
+    console.warn('[attendance] getTodayPunchStatus:', err)
   }
 
-  return null
+  // Fallback to localStorage (offline mode)
+  const localLogs = getLocalLogs()
+  return localLogs.find((l) => l.userId === userId && l.date === todayStr && !l.punchOutTime) ?? null
 }
 
 export async function punchIn(input: PunchInput): Promise<AttendanceRecord> {
   const now    = new Date()
-  const record: AttendanceRecord = {
-    id:            `att-${Date.now()}`,
+  const date   = format(now, 'yyyy-MM-dd')
+  const time   = format(now, 'hh:mm a')
+
+  // Build a temporary record for instant UI feedback
+  const tempRecord: AttendanceRecord = {
+    id:            `local-${Date.now()}`,
     userId:        input.userId,
     employeeName:  input.employeeName  ?? 'Staff Member',
     employeeEmail: input.employeeEmail ?? '',
-    date:          format(now, 'yyyy-MM-dd'),
-    punchInTime:   format(now, 'hh:mm a'),
+    date,
+    punchInTime:   time,
     status:        'present',
     notes:         input.notes,
     createdAt:     now.toISOString(),
   }
 
+  // Save to localStorage for instant UI
   const logs = getLocalLogs()
-  const idx  = logs.findIndex((l) => l.userId === input.userId && l.date === record.date)
-  if (idx !== -1) logs[idx] = record; else logs.unshift(record)
+  const idx  = logs.findIndex((l) => l.userId === input.userId && l.date === date)
+  if (idx !== -1) logs[idx] = tempRecord; else logs.unshift(tempRecord)
   saveLocalLogs(logs)
 
+  // Write to Supabase — do NOT send `id`, let Supabase auto-generate it
   try {
-    await (supabase.from('attendance') as any).insert({
-      id:             record.id,
-      user_id:        record.userId,
-      employee_name:  record.employeeName,
-      employee_email: record.employeeEmail,
-      date:           record.date,
-      punch_in_time:  record.punchInTime,
-      status:         record.status,
-      notes:          record.notes ?? null,
-    })
+    const { data, error } = await (supabase.from('attendance') as any)
+      .insert({
+        user_id:        input.userId,
+        employee_name:  input.employeeName  ?? 'Staff Member',
+        employee_email: input.employeeEmail ?? '',
+        date,
+        punch_in_time:  time,
+        status:         'present',
+        notes:          input.notes ?? null,
+      })
+      .select()
+      .maybeSingle()
+
+    if (error) {
+      console.error('[attendance] punchIn Supabase error:', error.message, error.details, error.hint)
+    } else if (data?.id) {
+      // Update localStorage with the real DB id
+      const updatedLogs = getLocalLogs()
+      const updatedIdx  = updatedLogs.findIndex((l) => l.id === tempRecord.id)
+      const dbRecord    = rowToRecord(data)
+      if (updatedIdx !== -1) updatedLogs[updatedIdx] = dbRecord
+      else updatedLogs.unshift(dbRecord)
+      saveLocalLogs(updatedLogs)
+      return dbRecord
+    }
   } catch (err) {
-    console.warn('[attendanceService] punchIn DB write:', err)
+    console.error('[attendance] punchIn:', err)
   }
 
-  return record
+  return tempRecord
 }
 
 export async function punchOut(input: { userId: string; notes?: string } | string): Promise<AttendanceRecord> {
@@ -135,7 +158,7 @@ export async function punchOut(input: { userId: string; notes?: string } | strin
   const updated: AttendanceRecord = current
     ? { ...current, punchOutTime: timeStr, workingHours: calcWorkingHours(current.punchInTime, timeStr), notes: notes ?? current.notes }
     : {
-        id: `att-${Date.now()}`, userId,
+        id: `local-${Date.now()}`, userId,
         employeeName: 'Staff Member', employeeEmail: '',
         date: dateStr, punchInTime: '09:00 AM',
         punchOutTime: timeStr, workingHours: calcWorkingHours('09:00 AM', timeStr),
@@ -146,47 +169,60 @@ export async function punchOut(input: { userId: string; notes?: string } | strin
   saveLocalLogs(logs)
 
   try {
-    if (current) {
-      await (supabase.from('attendance') as any)
+    if (current && !current.id.startsWith('local-')) {
+      // Update by real Supabase id
+      const { error } = await (supabase.from('attendance') as any)
         .update({ punch_out_time: updated.punchOutTime, working_hours: updated.workingHours })
         .eq('id', current.id)
+      if (error) console.error('[attendance] punchOut update error:', error.message)
+    } else if (current) {
+      // The punchIn might have succeeded in DB but we lost the real id — search by user+date
+      const { data, error } = await (supabase.from('attendance') as any)
+        .select('id')
+        .eq('user_id', userId)
+        .eq('date', dateStr)
+        .is('punch_out_time', null)
+        .maybeSingle()
+
+      if (error) console.error('[attendance] punchOut lookup error:', error.message)
+      else if (data?.id) {
+        await (supabase.from('attendance') as any)
+          .update({ punch_out_time: updated.punchOutTime, working_hours: updated.workingHours })
+          .eq('id', data.id)
+      }
     }
   } catch (err) {
-    console.warn('[attendanceService] punchOut DB write:', err)
+    console.error('[attendance] punchOut:', err)
   }
 
   return updated
 }
 
 export async function getAttendanceLogs(filters?: AttendanceFiltersState): Promise<AttendanceRecord[]> {
-  const localLogs = getLocalLogs()
-  let list: AttendanceRecord[] = [...localLogs]
+  let list: AttendanceRecord[] = []
 
+  // ── Supabase is the primary source of truth ──────────────────
   try {
-    const { data } = await (supabase.from('attendance') as any)
+    const { data, error } = await (supabase.from('attendance') as any)
       .select('*')
       .order('created_at', { ascending: false })
 
-    if (data?.length) {
-      const dbRecords: AttendanceRecord[] = data.map((d: any) => ({
-        id:            d.id,
-        userId:        d.user_id,
-        employeeName:  d.employee_name  ?? 'Staff Member',
-        employeeEmail: d.employee_email ?? '',
-        date:          d.date,
-        punchInTime:   d.punch_in_time,
-        punchOutTime:  d.punch_out_time  ?? undefined,
-        workingHours:  d.working_hours   ?? undefined,
-        status:        d.status          ?? 'present',
-        notes:         d.notes           ?? undefined,
-        createdAt:     d.created_at,
-      }))
-      dbRecords.forEach((r) => { if (!list.some((l) => l.id === r.id)) list.push(r) })
+    if (error) {
+      console.warn('[attendance] getAttendanceLogs error:', error.message)
+    } else if (data?.length) {
+      list = data.map(rowToRecord)
     }
   } catch (err) {
-    console.warn('[attendanceService] getAttendanceLogs DB:', err)
+    console.warn('[attendance] getAttendanceLogs:', err)
   }
 
+  // ── Supplement with localStorage records not yet synced ──────
+  const localLogs = getLocalLogs()
+  localLogs.forEach((r) => {
+    if (!list.some((l) => l.id === r.id)) list.push(r)
+  })
+
+  // ── Filters ──────────────────────────────────────────────────
   if (filters?.search) {
     const q = filters.search.toLowerCase()
     list = list.filter((a) => a.employeeName.toLowerCase().includes(q) || a.employeeEmail.toLowerCase().includes(q))
@@ -200,42 +236,58 @@ export async function getAttendanceLogs(filters?: AttendanceFiltersState): Promi
 
 export async function adminMarkAttendance(input: AdminMarkAttendanceInput): Promise<{ error?: string }> {
   try {
+    const punchPayload: any = {
+      user_id:        input.userId,
+      employee_name:  input.employeeName,
+      employee_email: input.employeeEmail ?? '',
+      date:           input.date,
+      punch_in_time:  input.punchInTime,
+      punch_out_time: input.punchOutTime ?? null,
+      working_hours:  input.punchInTime && input.punchOutTime
+        ? calcWorkingHours(input.punchInTime, input.punchOutTime)
+        : null,
+      status:         input.status,
+      notes:          input.notes ?? null,
+    }
+
+    // If editing an existing record (has a real DB id), update it; otherwise insert
+    let resultId = input.id
+    if (input.id && !input.id.startsWith('local-')) {
+      const { error } = await (supabase.from('attendance') as any)
+        .update(punchPayload)
+        .eq('id', input.id)
+      if (error) console.error('[attendance] adminMarkAttendance update error:', error.message)
+    } else {
+      const { data, error } = await (supabase.from('attendance') as any)
+        .insert(punchPayload)
+        .select()
+        .maybeSingle()
+      if (error) console.error('[attendance] adminMarkAttendance insert error:', error.message)
+      else resultId = data?.id
+    }
+
+    // Sync to localStorage
     const record: AttendanceRecord = {
-      id:            input.id ?? `att-${Date.now()}`,
+      id:            resultId ?? `local-${Date.now()}`,
       userId:        input.userId,
       employeeName:  input.employeeName,
       employeeEmail: input.employeeEmail ?? '',
       date:          input.date,
       punchInTime:   input.punchInTime,
       punchOutTime:  input.punchOutTime,
-      workingHours:  input.punchInTime && input.punchOutTime
-        ? calcWorkingHours(input.punchInTime, input.punchOutTime)
-        : undefined,
+      workingHours:  input.punchInTime && input.punchOutTime ? calcWorkingHours(input.punchInTime, input.punchOutTime) : undefined,
       status:        input.status,
       notes:         input.notes,
       createdAt:     new Date().toISOString(),
     }
-
     const logs = getLocalLogs()
-    const idx  = logs.findIndex((l) => l.id === record.id)
+    const idx  = logs.findIndex((l) => l.id === input.id)
     if (idx !== -1) logs[idx] = record; else logs.unshift(record)
     saveLocalLogs(logs)
 
-    await (supabase.from('attendance') as any).upsert({
-      id:             record.id,
-      user_id:        record.userId,
-      employee_name:  record.employeeName,
-      employee_email: record.employeeEmail,
-      date:           record.date,
-      punch_in_time:  record.punchInTime,
-      punch_out_time: record.punchOutTime ?? null,
-      working_hours:  record.workingHours ?? null,
-      status:         record.status,
-      notes:          record.notes ?? null,
-    })
     return {}
   } catch (err) {
-    console.warn('[attendanceService] adminMarkAttendance:', err)
+    console.error('[attendance] adminMarkAttendance:', err)
     return {}
   }
 }

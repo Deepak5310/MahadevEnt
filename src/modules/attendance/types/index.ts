@@ -26,7 +26,10 @@ export interface AttendanceFiltersState {
 }
 
 export interface PunchInput {
-  userId:    string
-  location?: string
-  notes?:    string
+  userId:         string
+  employeeName?:  string
+  employeeEmail?: string
+  department?:    string
+  location?:      string
+  notes?:         string
 }

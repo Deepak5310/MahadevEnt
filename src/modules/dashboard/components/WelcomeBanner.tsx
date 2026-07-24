@@ -101,61 +101,63 @@ export function WelcomeBanner() {
         </p>
       </div>
 
-      {/* Bottom Row: Attendance Status Card & Punch Button */}
-      <div
-        style={{
-          position:        'relative',
-          zIndex:          1,
-          display:         'flex',
-          alignItems:      'center',
-          justifyContent:  'space-between',
-          flexWrap:        'wrap',
-          gap:             '0.875rem',
-          backgroundColor: 'rgba(15, 23, 42, 0.65)',
-          backdropFilter:  'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
-          padding:         '0.875rem 1rem',
-          borderRadius:    '0.875rem',
-          border:          '1px solid rgba(255, 255, 255, 0.08)',
-          width:           '100%',
-          boxSizing:       'border-box',
-        }}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
-          <p style={{ fontSize: '0.65rem', fontWeight: 600, color: '#64748b', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-            ATTENDANCE STATUS
-          </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <span
-              style={{
-                width: '0.5rem', height: '0.5rem', borderRadius: '50%',
-                backgroundColor: isPunchedIn ? '#4ade80' : '#94a3b8',
-                boxShadow: isPunchedIn ? '0 0 8px #4ade80' : 'none',
-                flexShrink: 0,
-              }}
-            />
-            <p style={{ fontSize: '0.85rem', fontWeight: 600, color: isPunchedIn ? '#4ade80' : '#cbd5e1', margin: 0 }}>
-              {isPunchedIn ? `Punched In (${punchTime})` : 'Not Punched In'}
-            </p>
-          </div>
-        </div>
-
-        <Button
-          variant={isPunchedIn ? 'danger' : 'primary'}
-          size="md"
-          onClick={handlePunchToggle}
-          leftIcon={isPunchedIn ? <CheckCircle2 size={16} /> : <Clock size={16} />}
+      {/* Bottom Row: Attendance Status Card & Punch Button (Hide for Admin) */}
+      {user?.role !== 'admin' && (
+        <div
           style={{
-            height:       '2.35rem',
-            padding:      '0 1.15rem',
-            borderRadius: '0.625rem',
-            fontWeight:   600,
-            fontSize:     '0.85rem',
+            position:        'relative',
+            zIndex:          1,
+            display:         'flex',
+            alignItems:      'center',
+            justifyContent:  'space-between',
+            flexWrap:        'wrap',
+            gap:             '0.875rem',
+            backgroundColor: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter:  'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            padding:         '0.875rem 1rem',
+            borderRadius:    '0.875rem',
+            border:          '1px solid rgba(255, 255, 255, 0.08)',
+            width:           '100%',
+            boxSizing:       'border-box',
           }}
         >
-          {isPunchedIn ? 'Punch Out' : 'Punch In'}
-        </Button>
-      </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
+            <p style={{ fontSize: '0.65rem', fontWeight: 600, color: '#64748b', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+              ATTENDANCE STATUS
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <span
+                style={{
+                  width: '0.5rem', height: '0.5rem', borderRadius: '50%',
+                  backgroundColor: isPunchedIn ? '#4ade80' : '#94a3b8',
+                  boxShadow: isPunchedIn ? '0 0 8px #4ade80' : 'none',
+                  flexShrink: 0,
+                }}
+              />
+              <p style={{ fontSize: '0.85rem', fontWeight: 600, color: isPunchedIn ? '#4ade80' : '#cbd5e1', margin: 0 }}>
+                {isPunchedIn ? `Punched In (${punchTime})` : 'Not Punched In'}
+              </p>
+            </div>
+          </div>
+
+          <Button
+            variant={isPunchedIn ? 'danger' : 'primary'}
+            size="md"
+            onClick={handlePunchToggle}
+            leftIcon={isPunchedIn ? <CheckCircle2 size={16} /> : <Clock size={16} />}
+            style={{
+              height:       '2.35rem',
+              padding:      '0 1.15rem',
+              borderRadius: '0.625rem',
+              fontWeight:   600,
+              fontSize:     '0.85rem',
+            }}
+          >
+            {isPunchedIn ? 'Punch Out' : 'Punch In'}
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

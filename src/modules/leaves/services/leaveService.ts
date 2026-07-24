@@ -1,69 +1,8 @@
 import { supabase } from '../../../lib/supabase'
-import { format, differenceInBusinessDays, parseISO } from 'date-fns'
+import { differenceInBusinessDays, parseISO } from 'date-fns'
 import type { LeaveRequest, LeaveBalance, LeaveFiltersState, ApplyLeaveInput } from '../types'
 
-const MOCK_LEAVE_REQUESTS: LeaveRequest[] = [
-  {
-    id:            'leave-1',
-    userId:        'emp-2',
-    employeeName:  'Priya Patel',
-    employeeEmail: 'priya@mahadev.com',
-    department:    'HR & Admin',
-    leaveType:     'casual',
-    startDate:     format(new Date(), 'yyyy-MM-dd'),
-    endDate:       format(new Date(), 'yyyy-MM-dd'),
-    totalDays:     1,
-    reason:        'Personal family commitment.',
-    status:        'pending',
-    createdAt:     new Date().toISOString(),
-  },
-  {
-    id:            'leave-2',
-    userId:        'emp-1',
-    employeeName:  'Rahul Sharma',
-    employeeEmail: 'rahul@mahadev.com',
-    department:    'Operations',
-    leaveType:     'sick',
-    startDate:     '2026-07-28',
-    endDate:       '2026-07-29',
-    totalDays:     2,
-    reason:        'Viral fever and medical rest as advised by physician.',
-    status:        'approved',
-    adminComment:  'Approved by System Admin. Take care!',
-    createdAt:     new Date().toISOString(),
-  },
-  {
-    id:            'leave-3',
-    userId:        'emp-4',
-    employeeName:  'Sneha Gupta',
-    employeeEmail: 'sneha@mahadev.com',
-    department:    'Finance',
-    leaveType:     'earned',
-    startDate:     '2026-08-01',
-    endDate:       '2026-08-05',
-    totalDays:     5,
-    reason:        'Annual family vacation trip.',
-    status:        'pending',
-    createdAt:     new Date().toISOString(),
-  },
-  {
-    id:            'leave-4',
-    userId:        'emp-3',
-    employeeName:  'Amit Kumar',
-    employeeEmail: 'amit@mahadev.com',
-    department:    'Management',
-    leaveType:     'casual',
-    startDate:     '2026-07-15',
-    endDate:       '2026-07-15',
-    totalDays:     1,
-    reason:        'Urgent home maintenance work.',
-    status:        'rejected',
-    adminComment:  'Site audit planned on that date.',
-    createdAt:     new Date().toISOString(),
-  },
-]
-
-let leavesCache = [...MOCK_LEAVE_REQUESTS]
+let leavesCache: LeaveRequest[] = []
 
 export async function getLeaveRequests(filters?: LeaveFiltersState): Promise<LeaveRequest[]> {
   try {
@@ -87,6 +26,8 @@ export async function getLeaveRequests(filters?: LeaveFiltersState): Promise<Lea
         adminComment:  d.admin_comment || undefined,
         createdAt:     d.created_at,
       }))
+    } else {
+      leavesCache = []
     }
   } catch (err) {
     console.warn('[leaveService] Fallback query:', err)
@@ -100,8 +41,8 @@ export async function getLeaveRequests(filters?: LeaveFiltersState): Promise<Lea
       list = list.filter(
         (l) =>
           l.employeeName.toLowerCase().includes(q) ||
-          l.employeeEmail.toLowerCase().includes(q) ||
-          l.reason.toLowerCase().includes(q)
+          l.reason.toLowerCase().includes(q) ||
+          (l.department && l.department.toLowerCase().includes(q))
       )
     }
 
@@ -117,31 +58,34 @@ export async function getLeaveRequests(filters?: LeaveFiltersState): Promise<Lea
   return list
 }
 
-export async function getLeaveBalance(_userId: string): Promise<LeaveBalance> {
+export async function getLeaveBalance(userId: string): Promise<LeaveBalance> {
+  const userLeaves = leavesCache.filter((l) => l.userId === userId && l.status === 'approved')
+  const totalTaken = userLeaves.reduce((acc, l) => acc + l.totalDays, 0)
+
   return {
-    userId:     _userId,
-    casualLeft: 10,
-    sickLeft:   8,
-    earnedLeft: 15,
-    totalTaken: 3,
+    userId,
+    casualLeft: Math.max(0, 10 - totalTaken),
+    sickLeft:   Math.max(0, 8 - totalTaken),
+    earnedLeft: Math.max(0, 15 - totalTaken),
+    totalTaken,
   }
 }
 
 export async function applyLeave(input: ApplyLeaveInput): Promise<LeaveRequest> {
   const start = parseISO(input.startDate)
   const end   = parseISO(input.endDate)
-  const diff  = Math.max(1, Math.abs(differenceInBusinessDays(end, start)) + 1)
+  const days  = Math.max(1, differenceInBusinessDays(end, start) + 1)
 
   const newRequest: LeaveRequest = {
     id:            `leave-${Date.now()}`,
     userId:        input.userId,
-    employeeName:  'Mahadev Admin',
-    employeeEmail: 'admin@mahadev.com',
-    department:    'Management',
+    employeeName:  'Staff Member',
+    employeeEmail: '',
+    department:    'Operations',
     leaveType:     input.leaveType,
     startDate:     input.startDate,
     endDate:       input.endDate,
-    totalDays:     diff,
+    totalDays:     days,
     reason:        input.reason,
     status:        'pending',
     createdAt:     new Date().toISOString(),
@@ -151,19 +95,18 @@ export async function applyLeave(input: ApplyLeaveInput): Promise<LeaveRequest> 
 
   try {
     await (supabase.from('leaves') as any).insert({
-      id:             newRequest.id,
-      user_id:        newRequest.userId,
-      employee_name:  newRequest.employeeName,
-      employee_email: newRequest.employeeEmail,
-      leave_type:     newRequest.leaveType,
-      start_date:     newRequest.startDate,
-      end_date:       newRequest.endDate,
-      total_days:     newRequest.totalDays,
-      reason:         newRequest.reason,
-      status:         newRequest.status,
+      id:            newRequest.id,
+      user_id:       newRequest.userId,
+      employee_name: newRequest.employeeName,
+      leave_type:    newRequest.leaveType,
+      start_date:    newRequest.startDate,
+      end_date:      newRequest.endDate,
+      total_days:    newRequest.totalDays,
+      reason:        newRequest.reason,
+      status:        newRequest.status,
     })
   } catch (err) {
-    console.warn('[leaveService] Supabase offline fallback for applyLeave:', err)
+    console.warn('[leaveService] Supabase insert offline fallback:', err)
   }
 
   return newRequest
@@ -174,10 +117,10 @@ export async function updateLeaveStatus(
   status: 'approved' | 'rejected',
   adminComment?: string
 ): Promise<void> {
-  const idx = leavesCache.findIndex((l) => l.id === id)
-  if (idx !== -1) {
-    leavesCache[idx] = {
-      ...leavesCache[idx],
+  const index = leavesCache.findIndex((l) => l.id === id)
+  if (index !== -1) {
+    leavesCache[index] = {
+      ...leavesCache[index],
       status,
       adminComment,
     }
@@ -191,6 +134,6 @@ export async function updateLeaveStatus(
       })
       .eq('id', id)
   } catch (err) {
-    console.warn('[leaveService] Supabase offline update:', err)
+    console.warn('[leaveService] Supabase update offline fallback:', err)
   }
 }

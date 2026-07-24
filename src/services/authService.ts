@@ -139,7 +139,7 @@ async function signIn(
       return { error: 'Incorrect email or password.' }
     }
     if (error.message.includes('Email not confirmed')) {
-      return { error: 'Account not activated. Contact your administrator.' }
+      return { error: 'Employee email not confirmed in Supabase. Please turn off "Confirm email" in Supabase Auth settings or run SQL update to activate.' }
     }
     return { error: error.message }
   }

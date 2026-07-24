@@ -49,6 +49,8 @@ export function Topbar() {
 
         <div className="topbar-breadcrumb">
           <span className="topbar-breadcrumb-dot" />
+          <span style={{ color: '#94a3b8', fontSize: '0.8rem', fontWeight: 500 }}>Mahadev Enterprises</span>
+          <span style={{ color: '#64748b', fontSize: '0.75rem' }}>/</span>
           <span>{sectionTitle}</span>
         </div>
       </div>

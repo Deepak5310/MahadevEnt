@@ -71,39 +71,22 @@ export async function getEmployees(filters?: EmployeeFiltersState): Promise<Empl
 
 export async function createEmployee(input: CreateEmployeeInput): Promise<{ error?: string }> {
   try {
-    // Attempt Supabase signUp / profile creation
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email:    input.email,
-      password: input.password,
-      options:  {
-        data: {
-          full_name: input.fullName,
-        },
-      },
+    // We use a custom Postgres RPC to create the user directly in the database.
+    // This bypasses the Supabase Auth "Confirm Email" requirement and ensures
+    // the Admin's session is not modified or logged out during creation.
+    const { error } = await (supabase.rpc as any)('create_employee', {
+      emp_email:       input.email,
+      emp_password:    input.password,
+      emp_full_name:   input.fullName,
+      emp_role:        input.role,
+      emp_department:  input.department  ?? 'General',
+      emp_designation: input.designation ?? 'Team Member',
+      emp_phone:       input.phone       ?? null,
     })
 
-    if (authError) {
-      return { error: authError.message }
-    }
-
-    if (authData.user) {
-      // Upsert profile row
-      const newProfile = {
-        id:          authData.user.id,
-        full_name:   input.fullName,
-        email:       input.email,
-        role:        input.role,
-        department:  input.department  ?? 'General',
-        designation: input.designation ?? 'Team Member',
-        phone:       input.phone       ?? null,
-        is_active:   true,
-      }
-
-      const { error: profileErr } = await (supabase.from('profiles') as any).upsert(newProfile)
-
-      if (profileErr) {
-        console.error('[employeeService] Profile upsert error:', profileErr)
-      }
+    if (error) {
+      console.error('[employeeService] RPC create_employee error:', error)
+      return { error: error.message ?? 'Failed to create employee.' }
     }
 
     return {}

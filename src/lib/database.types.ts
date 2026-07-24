@@ -93,7 +93,20 @@ export interface Database {
       }
     }
     Views:     Record<string, never>
-    Functions: Record<string, never>
+    Functions: {
+      create_employee: {
+        Args: {
+          emp_email:       string
+          emp_password:    string
+          emp_full_name:   string
+          emp_role:        string
+          emp_department:  string
+          emp_designation: string
+          emp_phone:       string | null
+        }
+        Returns: string
+      }
+    }
     Enums:     Record<string, never>
   }
 }

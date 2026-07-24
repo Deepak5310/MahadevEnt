@@ -1,5 +1,5 @@
-import { useNavigate } from 'react-router-dom'
-import { UserPlus, MapPin, CalendarPlus, FileText, ArrowRight } from 'lucide-react'
+import { useNavigate } from 'react'
+import { UserPlus, ClipboardCheck, ArrowRight } from 'lucide-react'
 import { useAuthStore } from '../../../stores/useAuthStore'
 import { Card } from '../../../components/ui/Card'
 
@@ -24,30 +24,10 @@ export function QuickActions() {
         ]
       : []),
     {
-      id:          'field-visit',
-      title:       'Assign Visit',
-      subtitle:    'Schedule field location trip',
-      icon:        MapPin,
-      color:       '#f59e0b',
-      bg:          'rgba(245, 158, 11, 0.12)',
-      border:      'rgba(245, 158, 11, 0.25)',
-      onClick:     () => navigate('/field-visits'),
-    },
-    {
-      id:          'apply-leave',
-      title:       'Request Leave',
-      subtitle:    'Submit leave application',
-      icon:        CalendarPlus,
-      color:       '#22c55e',
-      bg:          'rgba(34, 197, 94, 0.12)',
-      border:      'rgba(34, 197, 94, 0.25)',
-      onClick:     () => navigate('/leaves'),
-    },
-    {
       id:          'view-logs',
       title:       'Attendance Logs',
-      subtitle:    'Check daily time punches',
-      icon:        FileText,
+      subtitle:    'View live punches & shift history',
+      icon:        ClipboardCheck,
       color:       '#38bdf8',
       bg:          'rgba(56, 189, 248, 0.12)',
       border:      'rgba(56, 189, 248, 0.25)',
@@ -60,7 +40,7 @@ export function QuickActions() {
       <div
         style={{
           display:             'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
           gap:                 '0.75rem',
         }}
       >

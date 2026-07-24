@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuthStore } from '../stores/useAuthStore'
 import {
@@ -6,20 +6,25 @@ import {
   punchIn,
   punchOut,
   getAttendanceLogs,
+  adminMarkAttendance,
+  subscribeToAttendanceChanges,
   PunchWidgetCard,
   AttendanceSummaryCards,
   AttendanceFiltersBar,
   AttendanceLogTable,
+  EditAttendanceModal,
+  type AttendanceRecord,
   type AttendanceFiltersState,
+  type AdminMarkAttendanceInput,
 } from '../modules/attendance'
 import { Spinner } from '../components/ui/Spinner'
 
 /**
- * AttendancePage — Time Punch & Daily Attendance Management Hub.
- * Features: Live time clock, GPS location stamp, instant punch in/out, summary metrics, and attendance log history.
+ * AttendancePage — Time Punch & Daily Attendance Management Hub with Realtime & Admin Edits.
  */
 export default function AttendancePage() {
   const user        = useAuthStore((s) => s.user)
+  const isAdmin     = user?.role === 'admin'
   const queryClient = useQueryClient()
 
   // Filter state
@@ -29,6 +34,21 @@ export default function AttendancePage() {
     department: 'all',
     date:       'today',
   })
+
+  // Modal State for Admin Manual Edit
+  const [isEditModalOpen, setIsEditModalOpen]       = useState(false)
+  const [selectedRecord, setSelectedRecord]         = useState<AttendanceRecord | null>(null)
+
+  // Real-time Supabase Subscription for live In Time / Out Time updates
+  useEffect(() => {
+    const unsubscribe = subscribeToAttendanceChanges(() => {
+      void queryClient.invalidateQueries({ queryKey: ['today-punch'] })
+      void queryClient.invalidateQueries({ queryKey: ['attendance-logs'] })
+    })
+    return () => {
+      unsubscribe()
+    }
+  }, [queryClient])
 
   // Queries
   const { data: currentRecord } = useQuery({
@@ -45,7 +65,7 @@ export default function AttendancePage() {
   // Mutations
   const punchInMutation = useMutation({
     mutationFn: ({ notes, location }: { notes?: string; location?: string }) =>
-      punchIn({ userId: user?.id ?? 'guest', notes, location }),
+      punchIn({ userId: user?.id ?? 'guest', employeeName: user?.name, employeeEmail: user?.email, department: user?.department, notes, location }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['today-punch'] })
       void queryClient.invalidateQueries({ queryKey: ['attendance-logs'] })
@@ -61,12 +81,34 @@ export default function AttendancePage() {
     },
   })
 
+  const adminEditMutation = useMutation({
+    mutationFn: (input: AdminMarkAttendanceInput) => adminMarkAttendance(input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['today-punch'] })
+      void queryClient.invalidateQueries({ queryKey: ['attendance-logs'] })
+    },
+  })
+
   async function handlePunchIn(notes?: string, location?: string) {
     await punchInMutation.mutateAsync({ notes, location })
   }
 
   async function handlePunchOut(notes?: string, location?: string) {
     await punchOutMutation.mutateAsync({ notes, location })
+  }
+
+  function handleEditPunch(record: AttendanceRecord) {
+    setSelectedRecord(record)
+    setIsEditModalOpen(true)
+  }
+
+  function handleManualAdd() {
+    setSelectedRecord(null)
+    setIsEditModalOpen(true)
+  }
+
+  async function handleAdminSave(input: AdminMarkAttendanceInput) {
+    await adminEditMutation.mutateAsync(input)
   }
 
   const isSubmitting = punchInMutation.isPending || punchOutMutation.isPending
@@ -80,17 +122,21 @@ export default function AttendancePage() {
           Attendance & Time Tracking
         </h1>
         <p style={{ fontSize: '0.875rem', color: '#94a3b8', margin: '0.25rem 0 0 0' }}>
-          Record shifts, punch in/out with GPS stamps, view daily summary metrics and team logs.
+          {isAdmin
+            ? 'Live Real-time Attendance Feed — View, mark, and edit employee punch times.'
+            : 'Record your daily shift, punch in/out with location stamps, and view personal attendance logs.'}
         </p>
       </div>
 
-      {/* Live Punch Control Center */}
-      <PunchWidgetCard
-        currentRecord={currentRecord ?? null}
-        onPunchIn={handlePunchIn}
-        onPunchOut={handlePunchOut}
-        isSubmitting={isSubmitting}
-      />
+      {/* Live Punch Control Center (For non-admin employees or testing) */}
+      {!isAdmin && (
+        <PunchWidgetCard
+          currentRecord={currentRecord ?? null}
+          onPunchIn={handlePunchIn}
+          onPunchOut={handlePunchOut}
+          isSubmitting={isSubmitting}
+        />
+      )}
 
       {/* Daily Summary Metric Cards */}
       <AttendanceSummaryCards records={logs} />
@@ -99,6 +145,7 @@ export default function AttendancePage() {
       <AttendanceFiltersBar
         filters={filters}
         onChange={setFilters}
+        onAddManualClick={handleManualAdd}
       />
 
       {/* Attendance Log Table */}
@@ -107,7 +154,20 @@ export default function AttendancePage() {
           <Spinner size="lg" color="#818cf8" />
         </div>
       ) : (
-        <AttendanceLogTable records={logs} />
+        <AttendanceLogTable
+          records={logs}
+          onEditPunch={handleEditPunch}
+        />
+      )}
+
+      {/* Edit / Manual Attendance Modal for Admin */}
+      {isEditModalOpen && (
+        <EditAttendanceModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          onSubmit={handleAdminSave}
+          initialRecord={selectedRecord}
+        />
       )}
     </div>
   )

@@ -4,26 +4,21 @@ import {
   LayoutDashboard,
   Users,
   ClipboardCheck,
-  MapPin,
-  CalendarOff,
   Code2,
 } from 'lucide-react'
 import { useUIStore }  from '../../stores/useUIStore'
-
-/**
- * Navigation item definition.
- * Add new modules here — no changes needed elsewhere in the layout.
- */
-const NAV_ITEMS = [
-  { to: '/dashboard',    label: 'Dashboard',    icon: LayoutDashboard },
-  { to: '/employees',    label: 'Employees',    icon: Users            },
-  { to: '/attendance',   label: 'Attendance',   icon: ClipboardCheck   },
-  { to: '/field-visits', label: 'Field Visits', icon: MapPin           },
-  { to: '/leaves',       label: 'Leaves',       icon: CalendarOff      },
-] as const
+import { useAuthStore } from '../../stores/useAuthStore'
 
 export function Sidebar() {
   const isCollapsed = useUIStore((s) => s.isSidebarCollapsed)
+  const user        = useAuthStore((s) => s.user)
+  const isAdmin     = user?.role === 'admin'
+
+  const navItems = [
+    { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    ...(isAdmin ? [{ to: '/employees', label: 'Employees', icon: Users }] : []),
+    { to: '/attendance', label: 'Attendance', icon: ClipboardCheck },
+  ]
 
   const sidebarClass = `sidebar${isCollapsed ? ' sidebar--collapsed' : ''}`
 
@@ -38,7 +33,7 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className="sidebar-nav">
-        {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
+        {navItems.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}
@@ -56,7 +51,7 @@ export function Sidebar() {
         ))}
       </nav>
 
-      {/* Footer — Developer Attribution Details (Logout button is in Topbar) */}
+      {/* Footer — Developer Attribution Details */}
       <div
         style={{
           padding:         '0.875rem 1rem',
@@ -85,7 +80,7 @@ export function Sidebar() {
         </div>
         {!isCollapsed && (
           <span style={{ fontSize: '0.68rem', color: '#64748b', whiteSpace: 'nowrap', paddingLeft: '1.35rem' }}>
-            Mahadev Recovery v1.0
+            Mahadev System v1.0
           </span>
         )}
       </div>

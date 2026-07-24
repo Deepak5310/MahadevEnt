@@ -1,4 +1,4 @@
-import { IndianRupee, HandCoins, Navigation, Handshake } from 'lucide-react'
+import { Users, UserCheck, Clock, ShieldCheck } from 'lucide-react'
 import { StatCard } from '../../../components/ui/StatCard'
 import type { DashboardMetrics } from '../types'
 
@@ -17,33 +17,31 @@ export function MetricGrid({ metrics }: MetricGridProps) {
       }}
     >
       <StatCard
-        title="Total POS Portfolio"
-        value="₹1.48 Cr"
+        title="Total Employees"
+        value={metrics.totalEmployees || 1}
         color="primary"
-        icon={<IndianRupee size={18} />}
-        trend={{ value: 12.4, direction: 'up', label: 'mo growth' }}
+        icon={<Users size={18} />}
       />
 
       <StatCard
-        title="Collections Today"
-        value="₹42,500"
+        title="Present Today"
+        value={metrics.presentToday || 1}
         color="success"
-        icon={<HandCoins size={18} />}
-        trend={{ value: 88.5, direction: 'up', label: 'target' }}
+        icon={<UserCheck size={18} />}
       />
 
       <StatCard
-        title="FOS Active On Field"
-        value={metrics.activeVisits || 12}
+        title="Attendance Rate"
+        value={`${metrics.attendanceRate || 100}%`}
         color="warning"
-        icon={<Navigation size={18} />}
+        icon={<ShieldCheck size={18} />}
       />
 
       <StatCard
-        title="Active PTP Pipeline"
-        value="18 PTPs"
-        color="error"
-        icon={<Handshake size={18} />}
+        title="Active Shifts"
+        value={metrics.activeVisits || 1}
+        color="info"
+        icon={<Clock size={18} />}
       />
     </div>
   )

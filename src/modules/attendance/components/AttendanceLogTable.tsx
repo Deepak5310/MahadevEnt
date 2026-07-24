@@ -1,10 +1,12 @@
-import { MapPin, FileCheck } from 'lucide-react'
+import { MapPin, FileCheck, Edit3 } from 'lucide-react'
 import type { AttendanceRecord, AttendanceStatus } from '../types'
 import { Avatar } from '../../../components/ui/Avatar'
 import { Badge }  from '../../../components/ui/Badge'
+import { useAuthStore } from '../../../stores/useAuthStore'
 
 interface AttendanceLogTableProps {
   records: AttendanceRecord[]
+  onEditPunch?: (record: AttendanceRecord) => void
 }
 
 function getStatusBadgeVariant(status: AttendanceStatus) {
@@ -29,7 +31,10 @@ function formatStatusText(status: AttendanceStatus) {
   }
 }
 
-export function AttendanceLogTable({ records }: AttendanceLogTableProps) {
+export function AttendanceLogTable({ records, onEditPunch }: AttendanceLogTableProps) {
+  const user    = useAuthStore((s) => s.user)
+  const isAdmin = user?.role === 'admin'
+
   if (records.length === 0) {
     return (
       <div
@@ -86,6 +91,7 @@ export function AttendanceLogTable({ records }: AttendanceLogTableProps) {
               <th style={{ padding: '0.875rem 1rem' }}>Hours</th>
               <th style={{ padding: '0.875rem 1rem' }}>Status</th>
               <th style={{ padding: '0.875rem 1.25rem' }}>Location Stamp</th>
+              {isAdmin && <th style={{ padding: '0.875rem 1.25rem', textAlign: 'right' }}>Admin Action</th>}
             </tr>
           </thead>
           <tbody>
@@ -146,6 +152,34 @@ export function AttendanceLogTable({ records }: AttendanceLogTableProps) {
                     </span>
                   </div>
                 </td>
+
+                {/* Admin Action: Edit Punch */}
+                {isAdmin && (
+                  <td style={{ padding: '0.875rem 1.25rem', textAlign: 'right' }}>
+                    {onEditPunch && (
+                      <button
+                        type="button"
+                        onClick={() => onEditPunch(rec)}
+                        style={{
+                          display:         'inline-flex',
+                          alignItems:      'center',
+                          gap:             '0.35rem',
+                          padding:         '0.35rem 0.75rem',
+                          backgroundColor: 'rgba(99, 102, 241, 0.15)',
+                          border:          '1px solid rgba(99, 102, 241, 0.3)',
+                          borderRadius:    '0.5rem',
+                          color:           '#a5b4fc',
+                          fontSize:        '0.75rem',
+                          fontWeight:      600,
+                          cursor:          'pointer',
+                        }}
+                      >
+                        <Edit3 size={13} />
+                        Edit Punch
+                      </button>
+                    )}
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

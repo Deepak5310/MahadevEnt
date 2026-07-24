@@ -33,3 +33,17 @@ export interface PunchInput {
   location?:      string
   notes?:         string
 }
+
+export interface AdminMarkAttendanceInput {
+  id?:           string
+  userId:        string
+  employeeName:  string
+  employeeEmail?: string
+  department?:   string
+  date:          string
+  punchInTime:   string
+  punchOutTime?: string
+  status:        AttendanceStatus
+  locationIn?:   string
+  notes?:        string
+}

@@ -1,12 +1,18 @@
-import { Search, Filter } from 'lucide-react'
+import { Search, Filter, Plus } from 'lucide-react'
 import type { AttendanceFiltersState } from '../types'
+import { Button } from '../../../components/ui/Button'
+import { useAuthStore } from '../../../stores/useAuthStore'
 
 interface AttendanceFiltersBarProps {
   filters: AttendanceFiltersState
   onChange: (filters: AttendanceFiltersState) => void
+  onAddManualClick?: () => void
 }
 
-export function AttendanceFiltersBar({ filters, onChange }: AttendanceFiltersBarProps) {
+export function AttendanceFiltersBar({ filters, onChange, onAddManualClick }: AttendanceFiltersBarProps) {
+  const user    = useAuthStore((s) => s.user)
+  const isAdmin = user?.role === 'admin'
+
   return (
     <div
       style={{
@@ -99,6 +105,19 @@ export function AttendanceFiltersBar({ filters, onChange }: AttendanceFiltersBar
           <option value="HR & Admin">HR & Admin</option>
           <option value="Finance">Finance</option>
         </select>
+
+        {/* Admin Manual Entry Trigger */}
+        {isAdmin && onAddManualClick && (
+          <Button
+            variant="primary"
+            size="md"
+            onClick={onAddManualClick}
+            leftIcon={<Plus size={15} />}
+            style={{ height: '2.35rem', borderRadius: '0.625rem', fontSize: '0.85rem' }}
+          >
+            Manual Entry
+          </Button>
+        )}
       </div>
     </div>
   )

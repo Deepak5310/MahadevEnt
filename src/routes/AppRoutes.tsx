@@ -4,21 +4,16 @@ import { lazy, Suspense } from 'react'
 import { MainLayout }     from '../components/layout'
 import { RouteErrorPage } from '../components/errors'
 import { ProtectedRoute } from './ProtectedRoute'
+import { AdminRoute }     from '../components/auth/AdminRoute'
 
 // ── Lazy-loaded pages ─────────────────────────────────────────
-// Each page is code-split into its own chunk.
-// Vite + React.lazy = zero-config route-level code splitting.
-const DashboardPage   = lazy(() => import('../pages/DashboardPage'))
-const EmployeesPage   = lazy(() => import('../pages/EmployeesPage'))
-const AttendancePage  = lazy(() => import('../pages/AttendancePage'))
-const FieldVisitsPage = lazy(() => import('../pages/FieldVisitsPage'))
-const LeavesPage      = lazy(() => import('../pages/LeavesPage'))
-const LoginPage       = lazy(() => import('../pages/LoginPage'))
-const NotFoundPage    = lazy(() => import('../pages/NotFoundPage'))
+const DashboardPage  = lazy(() => import('../pages/DashboardPage'))
+const EmployeesPage  = lazy(() => import('../pages/EmployeesPage'))
+const AttendancePage = lazy(() => import('../pages/AttendancePage'))
+const LoginPage      = lazy(() => import('../pages/LoginPage'))
+const NotFoundPage   = lazy(() => import('../pages/NotFoundPage'))
 
 // ── Suspense fallback ─────────────────────────────────────────
-// Minimal loading state while a lazy chunk fetches.
-// Replace with a skeleton loader in Step 4.
 function PageLoader() {
   return (
     <div
@@ -46,25 +41,6 @@ function withSuspense(Page: React.ComponentType) {
 }
 
 // ── Router definition ─────────────────────────────────────────
-/**
- * AppRoutes — Central route table for the entire application.
- *
- * Route groups:
- *  /              → Public redirect to /dashboard
- *  /login         → Public login page
- *  /dashboard     → Protected — all roles
- *  /employees     → Protected — all roles (admin sees all; employee sees own profile — RBAC enforced inside module)
- *  /attendance    → Protected — all roles
- *  /field-visits  → Protected — all roles
- *  /leaves        → Protected — all roles
- *  *              → 404 catch-all
- *
- * To add a new module:
- *  1. Create the page in src/pages/
- *  2. Add a lazy import above
- *  3. Add a child route below
- *  4. Add a nav item in Sidebar.tsx → NAV_ITEMS
- */
 export const router = createBrowserRouter([
   // ── Public routes ──────────────────────────────────────────
   {
@@ -83,7 +59,6 @@ export const router = createBrowserRouter([
     ),
     errorElement: <RouteErrorPage />,
     children: [
-      // Root redirect: / → /dashboard
       {
         index: true,
         element: <Navigate to="/dashboard" replace />,
@@ -94,19 +69,15 @@ export const router = createBrowserRouter([
       },
       {
         path: 'employees',
-        element: withSuspense(EmployeesPage),
+        element: (
+          <AdminRoute>
+            {withSuspense(EmployeesPage)}
+          </AdminRoute>
+        ),
       },
       {
         path: 'attendance',
         element: withSuspense(AttendancePage),
-      },
-      {
-        path: 'field-visits',
-        element: withSuspense(FieldVisitsPage),
-      },
-      {
-        path: 'leaves',
-        element: withSuspense(LeavesPage),
       },
     ],
   },

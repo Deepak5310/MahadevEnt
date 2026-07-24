@@ -1,9 +1,29 @@
 import { supabase } from '../../../lib/supabase'
 import { format }   from 'date-fns'
-import type { AttendanceRecord, AttendanceFiltersState, PunchInput } from '../types'
+import type { AttendanceRecord, AttendanceFiltersState, PunchInput, AdminMarkAttendanceInput } from '../types'
 
 // In-memory active punches state
 let activeUserPunchMap: Record<string, AttendanceRecord> = {}
+
+/**
+ * subscribeToAttendanceChanges — Realtime listener for live punch-in and punch-out updates.
+ */
+export function subscribeToAttendanceChanges(onChange: () => void) {
+  const channel = supabase
+    .channel('public:attendance')
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'attendance' },
+      () => {
+        onChange()
+      }
+    )
+    .subscribe()
+
+  return () => {
+    void supabase.removeChannel(channel)
+  }
+}
 
 export async function getTodayPunchStatus(userId: string): Promise<AttendanceRecord | null> {
   if (activeUserPunchMap[userId]) {
@@ -192,5 +212,31 @@ export async function getAttendanceLogs(filters?: AttendanceFiltersState): Promi
   } catch (err) {
     console.error('[attendanceService] Error fetching logs:', err)
     return Object.values(activeUserPunchMap)
+  }
+}
+
+export async function adminMarkAttendance(input: AdminMarkAttendanceInput): Promise<{ error?: string }> {
+  try {
+    const payload = {
+      id:             input.id || `att-${Date.now()}`,
+      user_id:        input.userId,
+      employee_name:  input.employeeName,
+      employee_email: input.employeeEmail || '',
+      department:     input.department || 'Operations',
+      date:           input.date,
+      punch_in_time:  input.punchInTime,
+      punch_out_time: input.punchOutTime || null,
+      status:         input.status,
+      location_in:    input.locationIn || 'Office',
+      notes:          input.notes || null,
+    }
+
+    const { error } = await (supabase.from('attendance') as any).upsert(payload)
+    if (error) {
+      return { error: error.message }
+    }
+    return {}
+  } catch (err: any) {
+    return { error: err.message ?? 'Failed to update attendance record.' }
   }
 }

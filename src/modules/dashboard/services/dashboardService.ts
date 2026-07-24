@@ -2,29 +2,51 @@ import { supabase }               from '../../../lib/supabase'
 import { formatDistanceToNow }     from 'date-fns'
 import type { DashboardMetrics, ActivityItem } from '../types'
 
+/** Fetch IDs of all admin users — used to exclude them from employee counts. */
+async function getAdminIds(): Promise<string[]> {
+  try {
+    const { data } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('role', 'admin')
+    return data?.map((p: any) => p.id) ?? []
+  } catch {
+    return []
+  }
+}
+
 export async function getDashboardMetrics(): Promise<DashboardMetrics> {
   try {
+    const adminIds = await getAdminIds()
+
+    // Total employees = all active profiles excluding admins
     const { count: empCount } = await supabase
       .from('profiles')
       .select('*', { count: 'exact', head: true })
+      .neq('role', 'admin')
+      .eq('is_active', true)
 
     const totalEmployees = empCount ?? 0
 
-    // Count today's punches from attendance table
+    // Today's attendance — exclude admin punches
     const today = new Date().toISOString().split('T')[0]
-    const { count: presentCount } = await (supabase.from('attendance') as any)
+    let presentQuery = (supabase.from('attendance') as any)
       .select('*', { count: 'exact', head: true })
       .eq('date', today)
       .in('status', ['present', 'late', 'field_visit'])
+    if (adminIds.length) presentQuery = presentQuery.not('user_id', 'in', `(${adminIds.join(',')})`)
+    const { count: presentCount } = await presentQuery
 
-    const presentToday    = presentCount ?? 0
-    const attendanceRate  = totalEmployees > 0 ? Math.round((presentToday / totalEmployees) * 100) : 0
+    const presentToday   = presentCount ?? 0
+    const attendanceRate = totalEmployees > 0 ? Math.round((presentToday / totalEmployees) * 100) : 0
 
-    // Active shifts = punched in but not out today
-    const { count: activeCount } = await (supabase.from('attendance') as any)
+    // Active shifts = punched in but not out today (employees only)
+    let activeQuery = (supabase.from('attendance') as any)
       .select('*', { count: 'exact', head: true })
       .eq('date', today)
       .is('punch_out_time', null)
+    if (adminIds.length) activeQuery = activeQuery.not('user_id', 'in', `(${adminIds.join(',')})`)
+    const { count: activeCount } = await activeQuery
 
     return {
       totalEmployees,
@@ -42,10 +64,13 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics> {
 
 export async function getRecentActivities(): Promise<ActivityItem[]> {
   try {
-    const { data } = await (supabase.from('attendance') as any)
+    const adminIds = await getAdminIds()
+    let query = (supabase.from('attendance') as any)
       .select('*')
       .order('created_at', { ascending: false })
       .limit(5)
+    if (adminIds.length) query = query.not('user_id', 'in', `(${adminIds.join(',')})`)
+    const { data } = await query
 
     if (!data?.length) return []
 

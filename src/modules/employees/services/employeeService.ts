@@ -26,6 +26,7 @@ export async function getEmployees(filters?: EmployeeFiltersState): Promise<Empl
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
+      .neq('role', 'admin')
       .order('created_at', { ascending: false })
 
     let list: Employee[] = []

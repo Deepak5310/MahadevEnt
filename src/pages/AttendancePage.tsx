@@ -50,8 +50,8 @@ export default function AttendancePage() {
   }, [queryClient])
 
   const { data: logs = [], isLoading } = useQuery({
-    queryKey: ['attendance-logs', filters],
-    queryFn:  () => getAttendanceLogs(filters),
+    queryKey: ['attendance-logs', filters, isAdmin],
+    queryFn:  () => getAttendanceLogs(filters, { excludeAdmins: isAdmin }),
   })
 
   // Employee sees only their own records

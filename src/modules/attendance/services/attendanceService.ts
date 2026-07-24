@@ -198,19 +198,40 @@ export async function punchOut(input: { userId: string; notes?: string } | strin
   return updated
 }
 
-export async function getAttendanceLogs(filters?: AttendanceFiltersState): Promise<AttendanceRecord[]> {
+export async function getAttendanceLogs(
+  filters?:      AttendanceFiltersState,
+  options?:      { excludeAdmins?: boolean },
+): Promise<AttendanceRecord[]> {
   let list: AttendanceRecord[] = []
+
+  // ── Fetch admin user IDs to exclude (if requested) ───────────
+  let adminIds: Set<string> = new Set()
+  if (options?.excludeAdmins) {
+    try {
+      const { data: adminProfiles } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('role', 'admin')
+      if (adminProfiles) {
+        adminIds = new Set(adminProfiles.map((p: any) => p.id))
+      }
+    } catch { /* ignore, fail open */ }
+  }
 
   // ── Supabase is the primary source of truth ──────────────────
   try {
-    const { data, error } = await (supabase.from('attendance') as any)
+    const query = (supabase.from('attendance') as any)
       .select('*')
       .order('created_at', { ascending: false })
+
+    const { data, error } = await query
 
     if (error) {
       console.warn('[attendance] getAttendanceLogs error:', error.message)
     } else if (data?.length) {
-      list = data.map(rowToRecord)
+      list = (data.map(rowToRecord) as AttendanceRecord[]).filter(
+        (r) => !adminIds.has(r.userId),
+      )
     }
   } catch (err) {
     console.warn('[attendance] getAttendanceLogs:', err)
@@ -219,7 +240,9 @@ export async function getAttendanceLogs(filters?: AttendanceFiltersState): Promi
   // ── Supplement with localStorage records not yet synced ──────
   const localLogs = getLocalLogs()
   localLogs.forEach((r) => {
-    if (!list.some((l) => l.id === r.id)) list.push(r)
+    if (!adminIds.has(r.userId) && !list.some((l) => l.id === r.id)) {
+      list.push(r)
+    }
   })
 
   // ── Filters ──────────────────────────────────────────────────

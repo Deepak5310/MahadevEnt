@@ -12,8 +12,6 @@ export interface AttendanceRecord {
   punchOutTime?: string // hh:mm a
   workingHours?: string // e.g. "8h 30m"
   status:        AttendanceStatus
-  locationIn?:   string
-  locationOut?:  string
   notes?:        string
   createdAt:     string
 }
@@ -29,8 +27,6 @@ export interface PunchInput {
   userId:         string
   employeeName?:  string
   employeeEmail?: string
-  department?:    string
-  location?:      string
   notes?:         string
 }
 
@@ -39,11 +35,9 @@ export interface AdminMarkAttendanceInput {
   userId:        string
   employeeName:  string
   employeeEmail?: string
-  department?:   string
   date:          string
   punchInTime:   string
   punchOutTime?: string
   status:        AttendanceStatus
-  locationIn?:   string
   notes?:        string
 }

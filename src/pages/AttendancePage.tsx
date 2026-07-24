@@ -69,8 +69,8 @@ export default function AttendancePage() {
 
   // Mutations
   const punchInMutation = useMutation({
-    mutationFn: ({ notes, location }: { notes?: string; location?: string }) =>
-      punchIn({ userId: user?.id ?? 'guest', employeeName: user?.name, employeeEmail: user?.email, notes, location }),
+    mutationFn: ({ notes }: { notes?: string }) =>
+      punchIn({ userId: user?.id ?? 'guest', employeeName: user?.name, employeeEmail: user?.email, notes }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['today-punch'] })
       void queryClient.invalidateQueries({ queryKey: ['attendance-logs'] })
@@ -78,8 +78,8 @@ export default function AttendancePage() {
   })
 
   const punchOutMutation = useMutation({
-    mutationFn: ({ notes, location }: { notes?: string; location?: string }) =>
-      punchOut({ userId: user?.id ?? 'guest', notes, location }),
+    mutationFn: ({ notes }: { notes?: string }) =>
+      punchOut({ userId: user?.id ?? 'guest', notes }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['today-punch'] })
       void queryClient.invalidateQueries({ queryKey: ['attendance-logs'] })
@@ -94,12 +94,12 @@ export default function AttendancePage() {
     },
   })
 
-  async function handlePunchIn(notes?: string, location?: string) {
-    await punchInMutation.mutateAsync({ notes, location })
+  async function handlePunchIn(notes?: string) {
+    await punchInMutation.mutateAsync({ notes })
   }
 
-  async function handlePunchOut(notes?: string, location?: string) {
-    await punchOutMutation.mutateAsync({ notes, location })
+  async function handlePunchOut(notes?: string) {
+    await punchOutMutation.mutateAsync({ notes })
   }
 
   function handleEditPunch(record: AttendanceRecord) {
@@ -129,7 +129,7 @@ export default function AttendancePage() {
         <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: '0.2rem 0 0 0' }}>
           {isAdmin
             ? 'Live real-time staff punch feed with manual edit controls.'
-            : 'Clock in/out with GPS location stamps and track your shift logs.'}
+            : 'Clock in/out for daily shifts and view your punch history.'}
         </p>
       </div>
 
@@ -146,12 +146,14 @@ export default function AttendancePage() {
       {/* Summary Stat Cards for Admin */}
       {isAdmin && <AttendanceSummaryCards records={logs} />}
 
-      {/* Log Filters Bar */}
-      <AttendanceFiltersBar
-        filters={filters}
-        onChange={setFilters}
-        onAddManualClick={handleManualAdd}
-      />
+      {/* Log Filters Bar (Admin Only) */}
+      {isAdmin && (
+        <AttendanceFiltersBar
+          filters={filters}
+          onChange={setFilters}
+          onAddManualClick={handleManualAdd}
+        />
+      )}
 
       {/* Attendance Log Table */}
       {isLogsLoading ? (

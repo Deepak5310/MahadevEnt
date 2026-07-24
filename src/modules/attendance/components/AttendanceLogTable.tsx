@@ -1,4 +1,4 @@
-import { MapPin, FileCheck, Edit3 } from 'lucide-react'
+import { FileCheck, Edit3 } from 'lucide-react'
 import type { AttendanceRecord, AttendanceStatus } from '../types'
 import { Avatar } from '../../../components/ui/Avatar'
 import { Badge }  from '../../../components/ui/Badge'
@@ -90,7 +90,6 @@ export function AttendanceLogTable({ records, onEditPunch }: AttendanceLogTableP
               <th style={{ padding: '0.75rem 0.75rem' }}>Punch Out</th>
               <th style={{ padding: '0.75rem 0.75rem' }}>Hours</th>
               <th style={{ padding: '0.75rem 0.75rem' }}>Status</th>
-              <th style={{ padding: '0.75rem 0.875rem' }}>Location Stamp</th>
               {isAdmin && <th style={{ padding: '0.75rem 0.875rem', textAlign: 'right' }}>Admin Action</th>}
             </tr>
           </thead>
@@ -141,16 +140,6 @@ export function AttendanceLogTable({ records, onEditPunch }: AttendanceLogTableP
                   <Badge variant={getStatusBadgeVariant(rec.status)} size="sm">
                     {formatStatusText(rec.status)}
                   </Badge>
-                </td>
-
-                {/* Location Stamp */}
-                <td style={{ padding: '0.65rem 0.875rem', color: '#94a3b8', fontSize: '0.78rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                    <MapPin size={12} color="#818cf8" style={{ flexShrink: 0 }} />
-                    <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '160px' }}>
-                      {rec.locationIn || 'Head Office'}
-                    </span>
-                  </div>
                 </td>
 
                 {/* Admin Action: Edit Punch */}

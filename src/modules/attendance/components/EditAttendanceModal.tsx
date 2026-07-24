@@ -21,12 +21,10 @@ export function EditAttendanceModal({
 
   const [employeeName, setEmployeeName]   = useState(initialRecord?.employeeName  ?? '')
   const [employeeEmail, setEmployeeEmail] = useState(initialRecord?.employeeEmail ?? '')
-  const [department, setDepartment]       = useState(initialRecord?.department    ?? 'Operations')
   const [date, setDate]                   = useState(initialRecord?.date          ?? todayStr)
   const [punchInTime, setPunchInTime]     = useState(initialRecord?.punchInTime   ?? '09:00 AM')
   const [punchOutTime, setPunchOutTime]   = useState(initialRecord?.punchOutTime  ?? '06:00 PM')
   const [status, setStatus]               = useState<AttendanceStatus>(initialRecord?.status ?? 'present')
-  const [locationIn, setLocationIn]       = useState(initialRecord?.locationIn    ?? 'Surat Office')
   const [notes, setNotes]                 = useState(initialRecord?.notes         ?? '')
   const [errorMsg, setErrorMsg]           = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting]   = useState(false)
@@ -47,12 +45,10 @@ export function EditAttendanceModal({
         userId:        initialRecord?.userId ?? `user-${Date.now()}`,
         employeeName,
         employeeEmail,
-        department,
         date,
         punchInTime,
         punchOutTime,
         status,
-        locationIn,
         notes,
       })
       onClose()
@@ -127,47 +123,31 @@ export function EditAttendanceModal({
           />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.875rem' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.35rem' }}>
-              Attendance Status
-            </label>
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value as AttendanceStatus)}
-              style={{
-                width:           '100%',
-                height:          '2.5rem',
-                padding:         '0 0.75rem',
-                backgroundColor: 'rgba(15, 23, 42, 0.6)',
-                border:          '1px solid rgba(255, 255, 255, 0.12)',
-                borderRadius:    '0.5rem',
-                color:           '#f8fafc',
-                fontSize:        '0.85rem',
-              }}
-            >
-              <option value="present">Present</option>
-              <option value="late">Late Arrival</option>
-              <option value="half_day">Half Day</option>
-              <option value="field_visit">Field Visit</option>
-              <option value="absent">Absent</option>
-            </select>
-          </div>
-
-          <Input
-            label="Department"
-            placeholder="Operations"
-            value={department}
-            onChange={(e) => setDepartment(e.target.value)}
-          />
+        <div>
+          <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.35rem' }}>
+            Attendance Status
+          </label>
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value as AttendanceStatus)}
+            style={{
+              width:           '100%',
+              height:          '2.5rem',
+              padding:         '0 0.75rem',
+              backgroundColor: 'rgba(15, 23, 42, 0.6)',
+              border:          '1px solid rgba(255, 255, 255, 0.12)',
+              borderRadius:    '0.5rem',
+              color:           '#f8fafc',
+              fontSize:        '0.85rem',
+            }}
+          >
+            <option value="present">Present</option>
+            <option value="late">Late Arrival</option>
+            <option value="field_visit">Field Visit</option>
+            <option value="half_day">Half Day</option>
+            <option value="absent">Absent</option>
+          </select>
         </div>
-
-        <Input
-          label="Location Stamp"
-          placeholder="Surat Office / Site Location"
-          value={locationIn}
-          onChange={(e) => setLocationIn(e.target.value)}
-        />
 
         <div>
           <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.35rem' }}>
@@ -176,7 +156,7 @@ export function EditAttendanceModal({
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Add manual edit justification or shift notes..."
+            placeholder="Add shift notes..."
             rows={2}
             style={{
               width:           '100%',

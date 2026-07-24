@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Clock, MapPin, CheckCircle2, AlertCircle, FileText } from 'lucide-react'
+import { Clock, CheckCircle2, AlertCircle, FileText } from 'lucide-react'
 import { format } from 'date-fns'
 import { Card }   from '../../../components/ui/Card'
 import { Button } from '../../../components/ui/Button'
@@ -7,8 +7,8 @@ import type { AttendanceRecord } from '../types'
 
 interface PunchWidgetCardProps {
   currentRecord: AttendanceRecord | null
-  onPunchIn:  (notes?: string, location?: string) => Promise<void>
-  onPunchOut: (notes?: string, location?: string) => Promise<void>
+  onPunchIn:  (notes?: string) => Promise<void>
+  onPunchOut: (notes?: string) => Promise<void>
   isSubmitting?: boolean
 }
 
@@ -18,10 +18,9 @@ export function PunchWidgetCard({
   onPunchOut,
   isSubmitting = false,
 }: PunchWidgetCardProps) {
-  const [timeStr, setTimeStr]   = useState(format(new Date(), 'hh:mm:ss a'))
-  const [dateStr, setDateStr]   = useState(format(new Date(), 'EEEE, MMMM d, yyyy'))
-  const [location, setLocation] = useState('Head Office - Surat (GPS Active)')
-  const [notes, setNotes]       = useState('')
+  const [timeStr, setTimeStr] = useState(format(new Date(), 'hh:mm:ss a'))
+  const [dateStr, setDateStr] = useState(format(new Date(), 'EEEE, MMMM d, yyyy'))
+  const [notes, setNotes]     = useState('')
 
   const isPunchedIn = Boolean(currentRecord && !currentRecord.punchOutTime)
 
@@ -36,9 +35,9 @@ export function PunchWidgetCard({
 
   async function handleToggle() {
     if (isPunchedIn) {
-      await onPunchOut(notes, location)
+      await onPunchOut(notes)
     } else {
-      await onPunchIn(notes, location)
+      await onPunchIn(notes)
     }
     setNotes('')
   }
@@ -48,26 +47,26 @@ export function PunchWidgetCard({
       <div
         style={{
           display:             'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
           gap:                 '1.25rem',
           alignItems:          'center',
         }}
       >
         {/* Left Column: Live Clock & Status */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             <span
               style={{
-                width:           '0.625rem',
-                height:          '0.625rem',
+                width:           '0.55rem',
+                height:          '0.55rem',
                 borderRadius:    '50%',
                 backgroundColor: isPunchedIn ? '#4ade80' : '#94a3b8',
-                boxShadow:       isPunchedIn ? '0 0 10px #4ade80' : 'none',
+                boxShadow:       isPunchedIn ? '0 0 8px #4ade80' : 'none',
               }}
             />
             <span
               style={{
-                fontSize:      '0.75rem',
+                fontSize:      '0.7rem',
                 fontWeight:    700,
                 color:         isPunchedIn ? '#4ade80' : '#94a3b8',
                 textTransform: 'uppercase',
@@ -80,83 +79,63 @@ export function PunchWidgetCard({
 
           <h2
             style={{
-              fontSize:      '2.25rem',
+              fontSize:      '2rem',
               fontWeight:    800,
               color:         '#f8fafc',
               fontFamily:    'monospace',
               letterSpacing: '-0.03em',
-              margin:        '0.2rem 0',
+              margin:        '0.15rem 0',
               lineHeight:    1,
             }}
           >
             {timeStr}
           </h2>
 
-          <p style={{ fontSize: '0.85rem', color: '#94a3b8', margin: 0, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <Clock size={14} color="#818cf8" />
+          <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: 0, display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+            <Clock size={13} color="#818cf8" />
             <span>{dateStr}</span>
           </p>
 
           {isPunchedIn && currentRecord && (
             <div
               style={{
-                marginTop:       '0.5rem',
-                padding:         '0.625rem 0.875rem',
+                marginTop:       '0.4rem',
+                padding:         '0.5rem 0.75rem',
                 backgroundColor: 'rgba(34, 197, 94, 0.1)',
                 border:          '1px solid rgba(34, 197, 94, 0.25)',
-                borderRadius:    '0.625rem',
-                fontSize:        '0.8rem',
+                borderRadius:    '0.5rem',
+                fontSize:        '0.75rem',
                 color:           '#4ade80',
                 display:         'flex',
                 alignItems:      'center',
-                gap:             '0.5rem',
+                gap:             '0.4rem',
               }}
             >
-              <CheckCircle2 size={16} color="#4ade80" />
-              <span>Punched in at <strong>{currentRecord.punchInTime}</strong> ({currentRecord.locationIn})</span>
+              <CheckCircle2 size={14} color="#4ade80" />
+              <span>Punched in at <strong>{currentRecord.punchInTime}</strong></span>
             </div>
           )}
         </div>
 
-        {/* Right Column: Location, Notes & Punch Action */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
+        {/* Right Column: Shift Remarks & Punch Button */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           
-          {/* Location status badge */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <MapPin size={16} color="#f59e0b" />
-            <input
-              type="text"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              placeholder="Current location stamp..."
-              style={{
-                flex:            1,
-                padding:         '0.4rem 0.65rem',
-                backgroundColor: 'rgba(15, 23, 42, 0.6)',
-                border:          '1px solid rgba(255, 255, 255, 0.08)',
-                borderRadius:    '0.5rem',
-                color:           '#cbd5e1',
-                fontSize:        '0.8rem',
-                outline:         'none',
-              }}
-            />
-          </div>
-
           {/* Notes Input */}
           <div style={{ position: 'relative' }}>
             <FileText
-              size={15}
+              size={14}
               color="#64748b"
-              style={{ position: 'absolute', left: '0.65rem', top: '0.65rem' }}
+              style={{ position: 'absolute', left: '0.65rem', top: '50%', transform: 'translateY(-50%)' }}
             />
             <input
               type="text"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Add shift notes or remarks (optional)..."
+              placeholder="Shift remarks (optional)..."
               style={{
                 width:           '100%',
-                padding:         '0.45rem 0.65rem 0.45rem 2.15rem',
+                height:          '2.2rem',
+                padding:         '0 0.65rem 0 2.15rem',
                 backgroundColor: 'rgba(15, 23, 42, 0.6)',
                 border:          '1px solid rgba(255, 255, 255, 0.08)',
                 borderRadius:    '0.5rem',
@@ -174,12 +153,12 @@ export function PunchWidgetCard({
             size="lg"
             onClick={handleToggle}
             loading={isSubmitting}
-            leftIcon={isPunchedIn ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
+            leftIcon={isPunchedIn ? <AlertCircle size={16} /> : <CheckCircle2 size={16} />}
             fullWidth
             style={{
-              height:       '2.85rem',
-              borderRadius: '0.75rem',
-              fontSize:     '0.95rem',
+              height:       '2.65rem',
+              borderRadius: '0.625rem',
+              fontSize:     '0.9rem',
               fontWeight:   700,
             }}
           >

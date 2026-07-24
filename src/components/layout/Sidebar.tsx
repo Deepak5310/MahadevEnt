@@ -5,8 +5,6 @@ import {
   Users,
   ClipboardCheck,
   Code2,
-  ShieldCheck,
-  User,
 } from 'lucide-react'
 import { useUIStore }  from '../../stores/useUIStore'
 import { useAuthStore } from '../../stores/useAuthStore'
@@ -27,66 +25,49 @@ export function Sidebar() {
   return (
     <aside className={sidebarClass} aria-label="Main navigation">
 
-      {/* Brand Header */}
-      <div className="sidebar-brand" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.25rem', padding: '1.25rem 1rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-          <div
-            style={{
-              width:           '2.1rem',
-              height:          '2.1rem',
-              borderRadius:    '0.625rem',
-              background:      'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-              display:         'flex',
-              alignItems:      'center',
-              justifyContent:  'center',
-              color:           '#fff',
-              flexShrink:      0,
-              boxShadow:       '0 4px 12px rgba(99, 102, 241, 0.4)',
-            }}
-          >
-            <Building2 size={18} />
-          </div>
-          {!isCollapsed && (
+      {/* Brand Header — Aligned with Topbar */}
+      <div className="sidebar-brand">
+        <div
+          style={{
+            width:           '2rem',
+            height:          '2rem',
+            borderRadius:    '0.5rem',
+            background:      'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+            display:         'flex',
+            alignItems:      'center',
+            justifyContent:  'center',
+            color:           '#fff',
+            flexShrink:      0,
+            boxShadow:       '0 4px 10px rgba(99, 102, 241, 0.35)',
+          }}
+        >
+          <Building2 size={16} />
+        </div>
+        {!isCollapsed && (
+          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
             <span
               style={{
-                fontSize:      '0.95rem',
+                fontSize:      '0.875rem',
                 fontWeight:    700,
                 color:         '#f8fafc',
-                letterSpacing: '-0.02em',
+                letterSpacing: '-0.01em',
                 whiteSpace:    'nowrap',
+                overflow:      'hidden',
+                textOverflow:  'ellipsis',
+                lineHeight:    1.2,
               }}
             >
               Mahadev Enterprises
             </span>
-          )}
-        </div>
-
-        {!isCollapsed && (
-          <div
-            style={{
-              display:         'inline-flex',
-              alignItems:      'center',
-              gap:             '0.3rem',
-              padding:         '0.15rem 0.5rem',
-              borderRadius:    '9999px',
-              backgroundColor: isAdmin ? 'rgba(99, 102, 241, 0.15)' : 'rgba(56, 189, 248, 0.15)',
-              border:          isAdmin ? '1px solid rgba(99, 102, 241, 0.3)' : '1px solid rgba(56, 189, 248, 0.3)',
-              color:           isAdmin ? '#a5b4fc' : '#7dd3fc',
-              fontSize:        '0.65rem',
-              fontWeight:      600,
-              marginTop:       '0.35rem',
-              textTransform:   'uppercase',
-              letterSpacing:   '0.05em',
-            }}
-          >
-            {isAdmin ? <ShieldCheck size={11} /> : <User size={11} />}
-            <span>{isAdmin ? 'ADMIN CONTROL' : 'STAFF WORKSTATION'}</span>
+            <span style={{ fontSize: '0.625rem', color: '#818cf8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              {isAdmin ? 'ADMIN CONTROL' : 'STAFF PORTAL'}
+            </span>
           </div>
         )}
       </div>
 
-      {/* Navigation */}
-      <nav className="sidebar-nav" style={{ padding: '0.75rem 0.75rem', gap: '0.35rem' }}>
+      {/* Navigation Links */}
+      <nav className="sidebar-nav" style={{ padding: '0.75rem 0.5rem', gap: '0.25rem' }}>
         {navItems.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
@@ -109,22 +90,22 @@ export function Sidebar() {
       <div
         style={{
           marginTop:       'auto',
-          padding:         '0.875rem 1rem',
+          padding:         '0.75rem 0.875rem',
           borderTop:       '1px solid rgba(255, 255, 255, 0.08)',
           backgroundColor: 'rgba(15, 23, 42, 0.5)',
           display:         'flex',
           flexDirection:   'column',
-          gap:             '0.2rem',
+          gap:             '0.15rem',
           overflow:        'hidden',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-          <Code2 size={15} color="#818cf8" style={{ flexShrink: 0 }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+          <Code2 size={14} color="#818cf8" style={{ flexShrink: 0 }} />
           <span
             style={{
-              fontSize:   '0.75rem',
+              fontSize:   '0.7rem',
               fontWeight: 600,
-              color:      '#f8fafc',
+              color:      '#cbd5e1',
               whiteSpace: 'nowrap',
               opacity:    isCollapsed ? 0 : 1,
               transition: 'opacity 0.2s ease',
@@ -134,7 +115,7 @@ export function Sidebar() {
           </span>
         </div>
         {!isCollapsed && (
-          <span style={{ fontSize: '0.65rem', color: '#64748b', whiteSpace: 'nowrap', paddingLeft: '1.35rem' }}>
+          <span style={{ fontSize: '0.625rem', color: '#64748b', whiteSpace: 'nowrap', paddingLeft: '1.2rem' }}>
             Mahadev v1.0 • Enterprise
           </span>
         )}

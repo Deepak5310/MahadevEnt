@@ -20,7 +20,7 @@ import {
 import { Spinner } from '../components/ui/Spinner'
 
 /**
- * AttendancePage — Time Punch & Daily Attendance Management Hub with Realtime & Admin Edits.
+ * AttendancePage — Uncluttered, High-Performance Attendance Hub.
  */
 export default function AttendancePage() {
   const user        = useAuthStore((s) => s.user)
@@ -39,7 +39,7 @@ export default function AttendancePage() {
   const [isEditModalOpen, setIsEditModalOpen]       = useState(false)
   const [selectedRecord, setSelectedRecord]         = useState<AttendanceRecord | null>(null)
 
-  // Real-time Supabase Subscription for live In Time / Out Time updates
+  // Real-time Supabase Subscription for live punches
   useEffect(() => {
     const unsubscribe = subscribeToAttendanceChanges(() => {
       void queryClient.invalidateQueries({ queryKey: ['today-punch'] })
@@ -62,10 +62,15 @@ export default function AttendancePage() {
     queryFn:  () => getAttendanceLogs(filters),
   })
 
+  // Filter personal logs for regular employees
+  const displayLogs = isAdmin
+    ? logs
+    : logs.filter((l) => l.userId === user?.id || l.employeeEmail === user?.email)
+
   // Mutations
   const punchInMutation = useMutation({
     mutationFn: ({ notes, location }: { notes?: string; location?: string }) =>
-      punchIn({ userId: user?.id ?? 'guest', employeeName: user?.name, employeeEmail: user?.email, department: user?.department, notes, location }),
+      punchIn({ userId: user?.id ?? 'guest', employeeName: user?.name, employeeEmail: user?.email, notes, location }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['today-punch'] })
       void queryClient.invalidateQueries({ queryKey: ['attendance-logs'] })
@@ -114,21 +119,21 @@ export default function AttendancePage() {
   const isSubmitting = punchInMutation.isPending || punchOutMutation.isPending
 
   return (
-    <div className="page" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '1400px', margin: '0 auto' }}>
+    <div className="page" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', maxWidth: '1400px', margin: '0 auto' }}>
       
       {/* Page Header */}
       <div>
-        <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#f8fafc', margin: 0, letterSpacing: '-0.02em' }}>
-          Attendance & Time Tracking
+        <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f8fafc', margin: 0, letterSpacing: '-0.02em' }}>
+          {isAdmin ? 'Live Attendance Management' : 'My Shift & Attendance'}
         </h1>
-        <p style={{ fontSize: '0.875rem', color: '#94a3b8', margin: '0.25rem 0 0 0' }}>
+        <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: '0.2rem 0 0 0' }}>
           {isAdmin
-            ? 'Live Real-time Attendance Feed — View, mark, and edit employee punch times.'
-            : 'Record your daily shift, punch in/out with location stamps, and view personal attendance logs.'}
+            ? 'Live real-time staff punch feed with manual edit controls.'
+            : 'Clock in/out with GPS location stamps and track your shift logs.'}
         </p>
       </div>
 
-      {/* Live Punch Control Center (For non-admin employees or testing) */}
+      {/* Live Punch Card for Employee */}
       {!isAdmin && (
         <PunchWidgetCard
           currentRecord={currentRecord ?? null}
@@ -138,8 +143,8 @@ export default function AttendancePage() {
         />
       )}
 
-      {/* Daily Summary Metric Cards */}
-      <AttendanceSummaryCards records={logs} />
+      {/* Summary Stat Cards for Admin */}
+      {isAdmin && <AttendanceSummaryCards records={logs} />}
 
       {/* Log Filters Bar */}
       <AttendanceFiltersBar
@@ -150,12 +155,12 @@ export default function AttendancePage() {
 
       {/* Attendance Log Table */}
       {isLogsLoading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '240px' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
           <Spinner size="lg" color="#818cf8" />
         </div>
       ) : (
         <AttendanceLogTable
-          records={logs}
+          records={displayLogs}
           onEditPunch={handleEditPunch}
         />
       )}

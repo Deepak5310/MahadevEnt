@@ -365,6 +365,11 @@
     gap: 0.5rem;
   }
 
+  .sidebar-brand {
+    height: 3.25rem !important;
+    padding: 0 0.75rem !important;
+  }
+
   .topbar-search {
     display: none !important;
   }

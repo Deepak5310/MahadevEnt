@@ -17,54 +17,10 @@ function mapProfileToEmployee(profile: Tables<'profiles'>): Employee {
   }
 }
 
-// Mock seed employees for testing if DB table is minimal
-const MOCK_EMPLOYEES: Employee[] = [
-  {
-    id:          'emp-1',
-    fullName:    'Rahul Sharma',
-    email:       'rahul@mahadev.com',
-    role:        'employee',
-    department:  'Operations',
-    designation: 'Field Executive',
-    phone:       '+91 98765 43210',
-    isActive:    true,
-    createdAt:   new Date().toISOString(),
-  },
-  {
-    id:          'emp-2',
-    fullName:    'Priya Patel',
-    email:       'priya@mahadev.com',
-    role:        'employee',
-    department:  'HR & Admin',
-    designation: 'HR Coordinator',
-    phone:       '+91 98765 12345',
-    isActive:    true,
-    createdAt:   new Date().toISOString(),
-  },
-  {
-    id:          'emp-3',
-    fullName:    'Amit Kumar',
-    email:       'amit@mahadev.com',
-    role:        'admin',
-    department:  'Management',
-    designation: 'Operations Manager',
-    phone:       '+91 98765 67890',
-    isActive:    true,
-    createdAt:   new Date().toISOString(),
-  },
-  {
-    id:          'emp-4',
-    fullName:    'Sneha Gupta',
-    email:       'sneha@mahadev.com',
-    role:        'employee',
-    department:  'Finance',
-    designation: 'Accountant',
-    phone:       '+91 98765 99887',
-    isActive:    false,
-    createdAt:   new Date().toISOString(),
-  },
-]
-
+/**
+ * getEmployees — Fetch real employee profiles strictly from Supabase database.
+ * No dummy/mock seed data injected.
+ */
 export async function getEmployees(filters?: EmployeeFiltersState): Promise<Employee[]> {
   try {
     const { data, error } = await supabase
@@ -74,16 +30,8 @@ export async function getEmployees(filters?: EmployeeFiltersState): Promise<Empl
 
     let list: Employee[] = []
 
-    if (!error && data && data.length > 0) {
+    if (!error && data) {
       list = data.map(mapProfileToEmployee)
-      // Merge mock data for demonstration if less than 3 employees
-      if (list.length < 3) {
-        const existingEmails = new Set(list.map((e) => e.email))
-        const extraMocks = MOCK_EMPLOYEES.filter((m) => !existingEmails.has(m.email))
-        list = [...list, ...extraMocks]
-      }
-    } else {
-      list = MOCK_EMPLOYEES
     }
 
     // Apply Client-side filtering
@@ -116,7 +64,7 @@ export async function getEmployees(filters?: EmployeeFiltersState): Promise<Empl
     return list
   } catch (err) {
     console.error('[employeeService] Failed to fetch employees:', err)
-    return MOCK_EMPLOYEES
+    return []
   }
 }
 

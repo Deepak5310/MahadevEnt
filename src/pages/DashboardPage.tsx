@@ -9,12 +9,15 @@ import {
   ActivityFeed,
 } from '../modules/dashboard'
 import { Spinner } from '../components/ui/Spinner'
+import { useAuthStore } from '../stores/useAuthStore'
 
 /**
- * DashboardPage — Executive Command Center.
- * Assembles WelcomeBanner, Metric Cards, Quick Shortcuts, Attendance Breakdown, and Live Activity Feed.
+ * DashboardPage — Executive Command Center & Personal Workstation.
  */
 export default function DashboardPage() {
+  const user    = useAuthStore((s) => s.user)
+  const isAdmin = user?.role === 'admin'
+
   const { data: metrics, isLoading: isMetricsLoading } = useQuery({
     queryKey: ['dashboard-metrics'],
     queryFn: getDashboardMetrics,
@@ -23,17 +26,18 @@ export default function DashboardPage() {
   const { data: activities, isLoading: isActivitiesLoading } = useQuery({
     queryKey: ['dashboard-activities'],
     queryFn: getRecentActivities,
+    enabled: isAdmin,
   })
 
-  const isLoading = isMetricsLoading || isActivitiesLoading
+  const isLoading = isMetricsLoading || (isAdmin && isActivitiesLoading)
 
   return (
-    <div className="page" style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem', width: '100%', maxWidth: '1400px', margin: '0 auto' }}>
-      {/* Welcome Banner & Quick Punch Widget */}
+    <div className="page" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', maxWidth: '1400px', margin: '0 auto' }}>
+      {/* Welcome Banner & Time Clock */}
       <WelcomeBanner />
 
       {isLoading && (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '280px' }}>
           <Spinner size="lg" color="#818cf8" />
         </div>
       )}
@@ -46,17 +50,17 @@ export default function DashboardPage() {
           {/* Quick Action Shortcuts */}
           <QuickActions />
 
-          {/* 2-Column Grid: Attendance Breakdown & Recent Activity */}
+          {/* Attendance Overview Grid */}
           <div
             style={{
               display:             'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gridTemplateColumns: isAdmin ? 'repeat(auto-fit, minmax(300px, 1fr))' : '1fr',
               gap:                 '1.25rem',
               alignItems:          'start',
             }}
           >
             <AttendanceWidget metrics={metrics} />
-            <ActivityFeed activities={activities ?? []} />
+            {isAdmin && <ActivityFeed activities={activities ?? []} />}
           </div>
         </>
       )}

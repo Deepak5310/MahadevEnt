@@ -474,9 +474,9 @@
   overflow: hidden;
 }
 
-.modal--sm  .modal-content { width: 24rem; }
-.modal--md  .modal-content { width: 32rem; }
-.modal--lg  .modal-content { width: 48rem; }
+.modal--sm  .modal-content { width: min(24rem, 92vw); max-height: 88vh; }
+.modal--md  .modal-content { width: min(32rem, 92vw); max-height: 88vh; }
+.modal--lg  .modal-content { width: min(48rem, 92vw); max-height: 88vh; }
 
 .modal-header {
   display: flex;

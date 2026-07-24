@@ -40,7 +40,7 @@ export function MetricGrid({ metrics }: MetricGridProps) {
       <StatCard
         title="Active Shifts"
         value={metrics.activeVisits || 1}
-        color="info"
+        color="primary"
         icon={<Clock size={18} />}
       />
     </div>

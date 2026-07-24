@@ -1,4 +1,4 @@
-import { useNavigate } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { UserPlus, ClipboardCheck, ArrowRight } from 'lucide-react'
 import { useAuthStore } from '../../../stores/useAuthStore'
 import { Card } from '../../../components/ui/Card'

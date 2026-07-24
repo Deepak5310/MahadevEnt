@@ -360,7 +360,8 @@
   }
 
   .topbar {
-    padding: 0 0.875rem;
+    height: 3.25rem !important;
+    padding: 0 0.75rem !important;
     gap: 0.5rem;
   }
 
@@ -389,6 +390,6 @@
   }
 
   .layout-main {
-    padding: 0.875rem 1rem;
+    padding: 0.75rem 0.75rem !important;
   }
 }
